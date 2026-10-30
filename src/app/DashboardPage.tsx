@@ -52,7 +52,7 @@ export function DashboardPage() {
         </p>
         <p>
           Ya puedes registrar tus <Link to="/ingredientes">ingredientes</Link>, sus <Link to="/compras">compras</Link> y llevar
-          el <Link to="/inventario">inventario</Link> por envase. Recetas y producción se irán habilitando a medida que avance el
+          el <Link to="/inventario">inventario</Link> por envase, y escribir tus <Link to="/recetas">recetas</Link> con versiones. La producción se irá habilitando a medida que avance el
           desarrollo.
         </p>
       </Card>

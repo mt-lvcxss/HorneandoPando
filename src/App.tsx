@@ -17,6 +17,10 @@ import { InventoryPage } from './modules/inventory/InventoryPage';
 import { NewPurchasePage } from './modules/purchases/NewPurchasePage';
 import { PurchaseDetailPage } from './modules/purchases/PurchaseDetailPage';
 import { PurchasesPage } from './modules/purchases/PurchasesPage';
+import { NewRecipePage } from './modules/recipes/NewRecipePage';
+import { NewRecipeVersionPage } from './modules/recipes/NewRecipeVersionPage';
+import { RecipeDetailPage } from './modules/recipes/RecipeDetailPage';
+import { RecipesPage } from './modules/recipes/RecipesPage';
 import { IngredientsPage } from './modules/ingredients/IngredientsPage';
 import { BusinessProfilePage } from './modules/settings/BusinessProfilePage';
 import { OperationSettingsPage } from './modules/settings/OperationSettingsPage';
@@ -45,6 +49,10 @@ export function App() {
               <Route path="/compras/:id" element={<PurchaseDetailPage />} />
               <Route path="/inventario" element={<InventoryPage />} />
               <Route path="/inventario/:id" element={<IngredientInventoryPage />} />
+              <Route path="/recetas" element={<RecipesPage />} />
+              <Route path="/recetas/nueva" element={<NewRecipePage />} />
+              <Route path="/recetas/:id" element={<RecipeDetailPage />} />
+              <Route path="/recetas/:id/nueva-version" element={<NewRecipeVersionPage />} />
               <Route path="/configuracion/negocio" element={<BusinessProfilePage />} />
               <Route path="/configuracion/operacion" element={<OperationSettingsPage />} />
             </Route>

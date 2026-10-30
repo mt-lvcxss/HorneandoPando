@@ -209,6 +209,10 @@ export type ChargeDistribution = 'by_value' | 'by_quantity';
 export type OperationSettings = {
   finished_goods_tracking: boolean;
   charge_distribution_default: ChargeDistribution;
+  /** Valor recomendado del precio sugerido por porcentaje sobre el costo (D-025). */
+  pricing_percentage: number;
+  /** Valor recomendado del precio sugerido por monto fijo sobre el costo, en CLP. */
+  pricing_fixed_clp: number;
   updated_at: string;
 };
 
@@ -222,6 +226,8 @@ export const settingsApi = {
     const { data, error } = await requireSupabase().rpc('update_operation_settings', {
       p_finished_goods_tracking: input.finished_goods_tracking,
       p_charge_distribution_default: input.charge_distribution_default,
+      p_pricing_percentage: input.pricing_percentage,
+      p_pricing_fixed_clp: input.pricing_fixed_clp,
     });
     return { data: data as OperationSettings | null, error };
   },
@@ -427,6 +433,12 @@ export const catalogApi = {
       p_note: note,
     });
     return { data: data as Equivalence | null, error };
+  },
+
+  /** Equivalencias vigentes de todos los ingredientes (para saber qué unidades admite cada uno). */
+  async listCurrentEquivalences(): Promise<Result<Equivalence[]>> {
+    const { data, error } = await requireSupabase().from('ingredient_equivalences').select('*').is('superseded_at', null);
+    return { data: data as Equivalence[] | null, error };
   },
 
   async retireEquivalence(id: string): Promise<Result<Equivalence>> {
@@ -777,5 +789,149 @@ export const inventoryApi = {
       p_notes: notes,
     });
     return { data: data as { adjusted: number } | null, error };
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Recetas y versiones
+// ---------------------------------------------------------------------------
+
+export type Recipe = {
+  id: string;
+  name: string;
+  description: string | null;
+  current_version_id: string | null;
+  archived_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type RecipeVersionKind = 'main' | 'alternative';
+
+export type RecipeVersion = {
+  id: string;
+  recipe_id: string;
+  version_no: number;
+  kind: RecipeVersionKind;
+  label: string;
+  based_on_version_id: string | null;
+  yield_quantity: number;
+  yield_unit: string;
+  instructions: string | null;
+  change_note: string | null;
+  created_at: string;
+};
+
+export type RecipeItem = {
+  version_id: string;
+  line_no: number;
+  ingredient_id: string;
+  quantity: number;
+  unit: string;
+  notes: string | null;
+};
+
+export type RecipeItemInput = { ingredient_id: string; quantity: number; unit: string; notes?: string | null };
+
+export type RecipeVersionInput = {
+  yieldQuantity: number;
+  yieldUnit: string;
+  items: RecipeItemInput[];
+  instructions: string | null;
+};
+
+export const recipesApi = {
+  async list(): Promise<Result<Recipe[]>> {
+    const { data, error } = await requireSupabase().from('recipes').select('*').order('name');
+    return { data: data as Recipe[] | null, error };
+  },
+
+  async listVersions(recipeId?: string): Promise<Result<RecipeVersion[]>> {
+    let query = requireSupabase().from('recipe_versions').select('*').order('version_no', { ascending: false });
+    if (recipeId) query = query.eq('recipe_id', recipeId);
+    const { data, error } = await query;
+    return { data: data as RecipeVersion[] | null, error };
+  },
+
+  async get(id: string): Promise<Result<{ recipe: Recipe; versions: RecipeVersion[]; items: RecipeItem[] }>> {
+    const sb = requireSupabase();
+    const [r, v] = await Promise.all([
+      sb.from('recipes').select('*').eq('id', id).maybeSingle(),
+      sb.from('recipe_versions').select('*').eq('recipe_id', id).order('version_no', { ascending: false }),
+    ]);
+    const error = r.error ?? v.error;
+    if (error || !r.data) return { data: null, error };
+    const versionIds = (v.data ?? []).map((x) => (x as RecipeVersion).id);
+    const i = await sb.from('recipe_version_items').select('*').in('version_id', versionIds).order('line_no');
+    if (i.error) return { data: null, error: i.error };
+    return {
+      data: { recipe: r.data as Recipe, versions: (v.data ?? []) as RecipeVersion[], items: (i.data ?? []) as RecipeItem[] },
+      error: null,
+    };
+  },
+
+  async create(
+    idempotencyKey: string,
+    input: RecipeVersionInput & { name: string; description: string | null },
+  ): Promise<Result<Recipe>> {
+    const { data, error } = await requireSupabase().rpc('create_recipe', {
+      p_idempotency_key: idempotencyKey,
+      p_name: input.name,
+      p_yield_quantity: input.yieldQuantity,
+      p_yield_unit: input.yieldUnit,
+      p_items: input.items,
+      p_description: input.description,
+      p_instructions: input.instructions,
+    });
+    return { data: data as Recipe | null, error };
+  },
+
+  async createVersion(
+    idempotencyKey: string,
+    recipeId: string,
+    input: RecipeVersionInput & {
+      kind: RecipeVersionKind;
+      label: string | null;
+      basedOn: string | null;
+      changeNote: string | null;
+      makeCurrent: boolean;
+    },
+  ): Promise<Result<RecipeVersion>> {
+    const { data, error } = await requireSupabase().rpc('create_recipe_version', {
+      p_idempotency_key: idempotencyKey,
+      p_recipe_id: recipeId,
+      p_kind: input.kind,
+      p_yield_quantity: input.yieldQuantity,
+      p_yield_unit: input.yieldUnit,
+      p_items: input.items,
+      p_label: input.label,
+      p_based_on: input.basedOn,
+      p_instructions: input.instructions,
+      p_change_note: input.changeNote,
+      p_make_current: input.makeCurrent,
+    });
+    return { data: data as RecipeVersion | null, error };
+  },
+
+  async setCurrentVersion(recipeId: string, versionId: string): Promise<Result<Recipe>> {
+    const { data, error } = await requireSupabase().rpc('set_current_recipe_version', {
+      p_recipe_id: recipeId,
+      p_version_id: versionId,
+    });
+    return { data: data as Recipe | null, error };
+  },
+
+  async update(recipeId: string, name: string, description: string | null): Promise<Result<Recipe>> {
+    const { data, error } = await requireSupabase().rpc('update_recipe', {
+      p_recipe_id: recipeId,
+      p_name: name,
+      p_description: description,
+    });
+    return { data: data as Recipe | null, error };
+  },
+
+  async setArchived(recipeId: string, archived: boolean): Promise<Result<Recipe>> {
+    const { data, error } = await requireSupabase().rpc('set_recipe_archived', { p_recipe_id: recipeId, p_archived: archived });
+    return { data: data as Recipe | null, error };
   },
 };

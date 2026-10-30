@@ -344,3 +344,41 @@ Se conservan en el equipo de desarrollo.
   repositorio público hay que reescribir el historial antes de publicarlo (ver L-14).
 
 ================================================================================
+
+## D-024 · Recetas con versiones inmutables
+**Fecha:** 2026-10-30 · **Estado:** vigente
+
+- Una receta (`recipes`) tiene versiones numeradas (`recipe_versions`) con sus líneas (`recipe_version_items`).
+  Versiones y líneas no se modifican ni se borran: editar la formulación crea una versión nueva.
+- **Principal**: modifica la receta y, por defecto, pasa a ser la vigente. **Alternativa**: variante que conserva la
+  formulación base; por defecto no cambia la vigente. Cualquier versión puede elegirse como vigente.
+- La versión vigente se valida con una FK compuesta: siempre pertenece a su receta.
+- Las cantidades se guardan tal como se escriben (0,5 kg queda como 0,5 kg, sin convertir ni redondear).
+  Al guardar se exige que cada línea sea convertible a la unidad del ingrediente (misma dimensión o equivalencia
+  vigente); si no, `UNIT_NOT_CONVERTIBLE`.
+- El rendimiento teórico es una cantidad con unidad libre (porciones, unidades, moldes).
+- El escalado por rendimiento deseado se muestra exacto y no modifica la receta. Los ajustes temporales se
+  registrarán en cada simulación o producción (3.4 y 3.5).
+- Nombre y descripción no son formulación: se editan sin crear versión (con auditoría).
+- **Costo teórico:** no se calcula en esta subetapa. Tras quitar el costo de reposición (D-019), se valorará con la
+  misma asignación de envases de la especificación (sección 7.4) en la subetapa 3.4, para no inventar un criterio.
+
+Migración: `20261031140000_recetas.sql`.
+
+================================================================================
+
+## D-025 · Precio sugerido: porcentaje o valor fijo sobre el costo
+**Fecha:** 2026-10-30 · **Estado:** vigente · Precisa D-017
+
+Decisión del usuario: al pedir un precio sugerido en una simulación, el emprendedor elige una de dos opciones y la
+aplicación le propone un valor recomendado que puede editar.
+- **Porcentaje sobre el costo:** recomendado 20 %. Precio = costo × (1 + porcentaje / 100).
+- **Valor fijo sobre el costo:** recomendado .000. Precio = costo + valor fijo.
+- Se aplica al costo total estimado de la simulación; el precio por unidad = precio total / rendimiento.
+- Los valores recomendados se guardan por negocio (`account_settings.pricing_percentage`, `pricing_fixed_clp`) y se
+  cambian en Configuración. Si el costo está incompleto, el precio sugerido se marca como incompleto.
+- **Interpretación a confirmar:** el porcentaje se aplica sobre el costo (recargo), no como margen sobre el precio.
+
+Migración: `20261031150000_precio_sugerido.sql`.
+
+================================================================================

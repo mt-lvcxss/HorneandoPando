@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { to: '/ingredientes', label: 'Ingredientes', end: false },
   { to: '/compras', label: 'Compras', end: false },
   { to: '/inventario', label: 'Inventario', end: false },
+  { to: '/recetas', label: 'Recetas', end: false },
   { to: '/configuracion/negocio', label: 'Datos del negocio', end: false },
   { to: '/configuracion/operacion', label: 'Configuración', end: false },
 ];

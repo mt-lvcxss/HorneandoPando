@@ -61,14 +61,23 @@ describe('configuración operacional', () => {
     const rows = await db.asUser(ana, () => db.rows('select * from public.account_settings'));
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ finished_goods_tracking: false, charge_distribution_default: 'by_value' });
+    // Valores recomendados del precio sugerido (D-025).
+    expect(Number(rows[0].pricing_percentage)).toBe(20);
+    expect(Number(rows[0].pricing_fixed_clp)).toBe(5000);
     expect(rows[0]).not.toHaveProperty('replacement_cost_criterion');
   });
 
   it('se actualiza solo por RPC, valida los valores y queda auditada', async () => {
-    const r = (await db.asUser(ana, () => db.rpc('update_operation_settings', [true, 'by_quantity']))) as Row;
-    expect(r).toMatchObject({ finished_goods_tracking: true, charge_distribution_default: 'by_quantity' });
+    const r = (await db.asUser(ana, () => db.rpc('update_operation_settings', [true, 'by_quantity', 25, 3000]))) as Row;
+    expect(r).toMatchObject({ finished_goods_tracking: true, charge_distribution_default: 'by_quantity', pricing_percentage: 25, pricing_fixed_clp: 3000 });
+    expect(await expectDbError(db.asUser(ana, () => db.rpc('update_operation_settings', [true, 'by_value', -1, 0])))).toBe(
+      'INVALID_PRICING_PERCENTAGE',
+    );
+    expect(await expectDbError(db.asUser(ana, () => db.rpc('update_operation_settings', [true, 'by_value', 20, -5])))).toBe(
+      'INVALID_PRICING_FIXED',
+    );
 
-    expect(await expectDbError(db.asUser(ana, () => db.rpc('update_operation_settings', [true, 'cualquiera'])))).toBe(
+    expect(await expectDbError(db.asUser(ana, () => db.rpc('update_operation_settings', [true, 'cualquiera', 20, 5000])))).toBe(
       'INVALID_DISTRIBUTION_CRITERION',
     );
     expect(

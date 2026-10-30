@@ -187,7 +187,7 @@ export function Stack({ children }: { children: ReactNode }) {
   return <div className={styles.stack}>{children}</div>;
 }
 
-export const uiClasses = { numeric: styles.numeric, muted: styles.muted, subsection: styles.subsection };
+export const uiClasses = { numeric: styles.numeric, muted: styles.muted, subsection: styles.subsection, preWrap: styles.preWrap };
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
   return <section className={`${styles.card} ${className ?? ''}`}>{children}</section>;

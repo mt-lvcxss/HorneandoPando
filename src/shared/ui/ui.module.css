@@ -308,3 +308,7 @@
 .block {
   display: block;
 }
+
+.preWrap {
+  white-space: pre-wrap;
+}

@@ -36,14 +36,14 @@ Actualizado: 2026-10-30.
 
 ## Etapa 3 · Núcleo operacional — en curso
 
-Plan confirmado: `docs/plan-etapa-3.md` (decisiones D-017 a D-023).
+Plan confirmado: `docs/plan-etapa-3.md` (decisiones D-017 a D-025).
 
 | Subetapa | Estado |
 |---|---|
 | 3.1 Catálogo y configuración | ✅ Cerrada (commit 57020e4) |
-| 3.2 Compras e inventario por envase | Implementada: 17 pruebas de base de datos y 2 de concurrencia contra Supabase real. Migración aplicada en `horneando-test`. **Pendiente:** recorrido en el navegador |
-| 3.3 Recetas y versiones | Pendiente |
-| 3.4 Simulaciones | Pendiente (confirmar detalle del precio sugerido) |
+| 3.2 Compras e inventario por envase | ✅ Cerrada (commit b567382) |
+| 3.3 Recetas y versiones | ✅ Implementada (7 pruebas de base de datos); migración aplicada en `horneando-test` |
+| 3.4 Simulaciones | En curso: valores recomendados del precio sugerido listos (D-025) |
 | 3.5 Producción real y costos | Pendiente |
 | 3.6 Productos terminados y gastos generales | Pendiente |
 | 3.7 Cierre de la etapa | Pendiente |
@@ -69,6 +69,16 @@ Plan confirmado: `docs/plan-etapa-3.md` (decisiones D-017 a D-023).
 - Conteo físico parcial por envase con confirmación; rechaza conteos desactualizados.
 - Disponible visible en ingredientes, inventario y detalle; aviso solo cuando un ingrediente se agota (también en Inicio).
 - Pantallas: `/compras`, `/compras/nueva`, `/compras/:id`, `/inventario`, `/inventario/:id`.
+
+================================================================================
+
+### 3.3 · Qué incluye
+- Recetas con versiones numeradas e inmutables: principal (reemplaza a la vigente) o alternativa (conserva la base).
+- Elegir cualquier versión como vigente; historial completo y comparación entre dos versiones.
+- Rendimiento teórico con unidad libre; escalado exacto a otro rendimiento sin modificar la receta.
+- Cada ingrediente debe poder convertirse (misma dimensión o equivalencia); un ingrediente archivado no entra en
+  versiones nuevas.
+- Pantallas: `/recetas`, `/recetas/nueva`, `/recetas/:id`, `/recetas/:id/nueva-version`.
 
 ================================================================================
 
