@@ -36,14 +36,14 @@ Actualizado: 2026-10-30.
 
 ## Etapa 3 · Núcleo operacional — en curso
 
-Plan confirmado: `docs/plan-etapa-3.md` (decisiones D-017 a D-025).
+Plan confirmado: `docs/plan-etapa-3.md` (decisiones D-017 a D-026).
 
 | Subetapa | Estado |
 |---|---|
 | 3.1 Catálogo y configuración | ✅ Cerrada (commit 57020e4) |
 | 3.2 Compras e inventario por envase | ✅ Cerrada (commit b567382) |
-| 3.3 Recetas y versiones | ✅ Implementada (7 pruebas de base de datos); migración aplicada en `horneando-test` |
-| 3.4 Simulaciones | En curso: valores recomendados del precio sugerido listos (D-025) |
+| 3.3 Recetas y versiones | ✅ Cerrada (commit e9e3fac) |
+| 3.4 Simulaciones | ✅ Cerrada (recorrido en el navegador aprobado por el usuario) |
 | 3.5 Producción real y costos | Pendiente |
 | 3.6 Productos terminados y gastos generales | Pendiente |
 | 3.7 Cierre de la etapa | Pendiente |
@@ -82,6 +82,16 @@ Plan confirmado: `docs/plan-etapa-3.md` (decisiones D-017 a D-025).
 
 ================================================================================
 
+### 3.4 · Qué incluye
+- Propuesta de envases según la sección 7.4 (abiertos primero, menos envases abiertos, más antiguo).
+- Estimación con escalado exacto, ajustes temporales por ingrediente, faltantes, mano de obra (por producción o por
+  unidad), embalajes, etiquetas y otros costos, costo provisional explícito y precio sugerido (20 % o $5.000, editables).
+- Costo teórico de cada versión de receta con el inventario actual.
+- Simulaciones guardadas como foto inmutable; no tocan inventario ni reservan.
+- Pantallas: `/simulaciones`, `/simulaciones/nueva`, `/simulaciones/:id` y costo teórico en `/recetas/:id`.
+
+================================================================================
+
 ## Limitaciones y riesgos conocidos
 
 | # | Descripción | Impacto | Riesgo | Plan |
@@ -90,7 +100,7 @@ Plan confirmado: `docs/plan-etapa-3.md` (decisiones D-017 a D-025).
 | L-2 | El plan gratuito de Supabase pausa proyectos tras ~7 días sin actividad | La app deja de responder hasta reactivarla | Medio | Monitorear; evaluar plan pago tras el piloto |
 | L-3 | El plan gratuito no incluye respaldos descargables | Pérdida de datos ante incidente | Alto con datos reales | Respaldo semanal propio vía GitHub Actions **antes de tener usuarios reales** |
 | L-4 | Concurrencia real no se puede probar con PGlite | Errores de concurrencia no detectados localmente | Bajo | Inventario cubierto con pruebas contra `horneando-test` (D-021); producción (3.5) agregará las suyas |
-| L-5 | Paquete JS de 636 kB | Carga inicial más lenta en móviles | Bajo | División por módulos al crecer la app |
+| L-5 | Paquete JS de 676 kB | Carga inicial más lenta en móviles | Bajo | División por módulos al crecer la app |
 | L-6 | Borrar datos del navegador obliga a verificar el dispositivo otra vez | Molestia menor | Bajo | Documentado en la ayuda |
 | L-7 | PWA (instalación y borradores sin conexión) aún no implementada | No instalable todavía | Bajo | Etapa 3–5 |
 | L-8 | Usuarios de prueba de integración no se pueden borrar (FK `on delete restrict`) | Basura en el proyecto de pruebas | Bajo | Se bloquean al terminar; limpieza manual periódica |

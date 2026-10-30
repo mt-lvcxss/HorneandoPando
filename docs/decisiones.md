@@ -382,3 +382,27 @@ aplicación le propone un valor recomendado que puede editar.
 Migración: `20261031150000_precio_sugerido.sql`.
 
 ================================================================================
+
+## D-026 · Asignación de envases, costo teórico y simulaciones
+**Fecha:** 2026-10-30 · **Estado:** vigente
+
+- **Propuesta de envases** (`private.allocate_ingredient`, sección 7.4): primero los abiertos (del más antiguo al más
+  nuevo); luego los cerrados abriendo la menor cantidad posible: si uno solo cubre lo que falta, el más antiguo de los
+  que alcanzan; si ninguno alcanza, el más grande (empate: el más antiguo). No bloquea nada: la producción real (3.5)
+  la revalida con bloqueo y permite editarla.
+- **Costo de lo asignado:** cantidad × (costo unitario + cargo proporcional). Al abrir un envase cerrado se suma
+  entero su cargo "completo en el primer uso".
+- **Costo desconocido:** la cantidad tomada de envases sin costo y la cantidad faltante quedan como "sin costo";
+  la línea y el total se marcan incompletos (nunca /usr/bin/bash). El usuario puede indicar un costo provisional explícito por
+  ingrediente (por kg, l o unidad), que se marca como provisional.
+- **Mano de obra:** por producción o por unidad. Si no se registra, el resultado queda incompleto con advertencia.
+- **Embalajes, etiquetas, presentación y otros:** líneas manuales (D-017).
+- **Costo teórico de la receta:** la misma estimación para el rendimiento teórico, solo ingredientes. Se muestra en
+  el detalle de la receta y cambia con el inventario disponible.
+- **Simulación:** se guarda la foto completa del cálculo (parámetros y resultado) en `simulations`, inmutable.
+  No modifica inventario, no abre envases ni reserva nada. "Simular de nuevo" recalcula con el inventario actual.
+- **Precio sugerido:** según D-025, sobre el costo total; queda marcado si el costo no está completo.
+
+Migración: `20261031160000_simulaciones.sql`.
+
+================================================================================

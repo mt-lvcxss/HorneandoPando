@@ -935,3 +935,136 @@ export const recipesApi = {
     return { data: data as Recipe | null, error };
   },
 };
+
+// ---------------------------------------------------------------------------
+// Estimaciones y simulaciones (no modifican inventario)
+// ---------------------------------------------------------------------------
+
+export type LaborMode = 'per_batch' | 'per_unit';
+export type ExtraCostKind = 'packaging' | 'label' | 'presentation' | 'other';
+export type PricingMethod = 'percentage' | 'fixed';
+export type EstimateStatus = 'complete' | 'provisional' | 'incomplete';
+
+export type EstimateParams = {
+  versionId: string;
+  desiredYield: number | null;
+  /** Reemplazo temporal de la cantidad escalada de una línea. */
+  adjustments: { ingredient_id: string; quantity: number; unit: string }[];
+  /** Costo provisional por unidad base para la parte sin costo conocido. */
+  provisional: { ingredient_id: string; unit_cost: number }[];
+  labor: { mode: LaborMode; amount_clp: number } | null;
+  extras: { kind: ExtraCostKind; description: string; amount_clp: number }[];
+  pricing: { method: PricingMethod; value: number } | null;
+};
+
+export type AllocationPick = {
+  container_id: string;
+  brand_id: string;
+  received_on: string;
+  opened: boolean;
+  balance: number;
+  take: number;
+  unit_cost: number | null;
+  cost_status: CostStatus;
+  charge_unit_cost: number;
+  first_use_clp: number;
+  cost: number | null;
+};
+
+export type EstimateLine = {
+  line_no: number;
+  ingredient_id: string;
+  ingredient_name: string;
+  dimension: Dimension;
+  recipe_quantity: number;
+  recipe_unit: string;
+  quantity: number;
+  unit: string;
+  adjusted: boolean;
+  required: number;
+  allocated: number;
+  shortage: number;
+  containers: AllocationPick[];
+  known_cost: number;
+  unknown_quantity: number;
+  provisional_unit_cost: number | null;
+  cost_status: EstimateStatus;
+};
+
+export type Estimate = {
+  recipe_id: string;
+  recipe_name: string;
+  version_id: string;
+  version_label: string;
+  yield_quantity: number;
+  yield_unit: string;
+  desired_yield: number;
+  scale_factor: number;
+  lines: EstimateLine[];
+  ingredients_cost: number;
+  labor: { mode: LaborMode; amount_clp: number; total: number } | null;
+  extras: { kind: ExtraCostKind; description: string; amount_clp: number }[];
+  extras_cost: number;
+  total_cost: number;
+  unit_cost: number;
+  cost_status: EstimateStatus;
+  warnings: ('labor_missing' | 'unknown_ingredient_cost' | 'provisional_cost' | 'shortage')[];
+  has_shortages: boolean;
+  pricing: { method: PricingMethod; value: number; price: number; unit_price: number } | null;
+};
+
+export type Simulation = {
+  id: string;
+  recipe_id: string;
+  version_id: string;
+  desired_yield: number;
+  total_cost: number;
+  cost_status: EstimateStatus;
+  has_shortages: boolean;
+  parameters: Record<string, unknown>;
+  result: Estimate;
+  notes: string | null;
+  created_at: string;
+};
+
+function estimateArgs(p: EstimateParams) {
+  return {
+    p_version_id: p.versionId,
+    p_desired_yield: p.desiredYield,
+    p_adjustments: p.adjustments,
+    p_provisional: p.provisional,
+    p_labor: p.labor,
+    p_extras: p.extras,
+    p_pricing: p.pricing,
+  };
+}
+
+export const simulationsApi = {
+  async estimate(params: EstimateParams): Promise<Result<Estimate>> {
+    const { data, error } = await requireSupabase().rpc('estimate_production', estimateArgs(params));
+    return { data: data as Estimate | null, error };
+  },
+
+  async save(idempotencyKey: string, params: EstimateParams, notes: string | null): Promise<Result<{ id: string }>> {
+    const { data, error } = await requireSupabase().rpc('save_simulation', {
+      p_idempotency_key: idempotencyKey,
+      ...estimateArgs(params),
+      p_notes: notes,
+    });
+    return { data: data as { id: string } | null, error };
+  },
+
+  async list(): Promise<Result<Simulation[]>> {
+    const { data, error } = await requireSupabase()
+      .from('simulations')
+      .select('id, recipe_id, version_id, desired_yield, total_cost, cost_status, has_shortages, notes, created_at, result')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    return { data: data as Simulation[] | null, error };
+  },
+
+  async get(id: string): Promise<Result<Simulation>> {
+    const { data, error } = await requireSupabase().from('simulations').select('*').eq('id', id).maybeSingle();
+    return { data: data as Simulation | null, error };
+  },
+};

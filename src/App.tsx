@@ -21,6 +21,9 @@ import { NewRecipePage } from './modules/recipes/NewRecipePage';
 import { NewRecipeVersionPage } from './modules/recipes/NewRecipeVersionPage';
 import { RecipeDetailPage } from './modules/recipes/RecipeDetailPage';
 import { RecipesPage } from './modules/recipes/RecipesPage';
+import { NewSimulationPage } from './modules/simulations/NewSimulationPage';
+import { SimulationDetailPage } from './modules/simulations/SimulationDetailPage';
+import { SimulationsPage } from './modules/simulations/SimulationsPage';
 import { IngredientsPage } from './modules/ingredients/IngredientsPage';
 import { BusinessProfilePage } from './modules/settings/BusinessProfilePage';
 import { OperationSettingsPage } from './modules/settings/OperationSettingsPage';
@@ -53,6 +56,9 @@ export function App() {
               <Route path="/recetas/nueva" element={<NewRecipePage />} />
               <Route path="/recetas/:id" element={<RecipeDetailPage />} />
               <Route path="/recetas/:id/nueva-version" element={<NewRecipeVersionPage />} />
+              <Route path="/simulaciones" element={<SimulationsPage />} />
+              <Route path="/simulaciones/nueva" element={<NewSimulationPage />} />
+              <Route path="/simulaciones/:id" element={<SimulationDetailPage />} />
               <Route path="/configuracion/negocio" element={<BusinessProfilePage />} />
               <Route path="/configuracion/operacion" element={<OperationSettingsPage />} />
             </Route>

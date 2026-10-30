@@ -22,6 +22,7 @@ import {
 } from '../../shared/ui';
 import { useOnlineStatus } from '../../shared/useOnlineStatus';
 import { formatAmount } from '../ingredients/catalog';
+import { TheoreticalCost } from '../simulations/TheoreticalCost';
 import { scaledAmount, useRecipeCatalog, VERSION_KIND_LABEL } from './recipes';
 
 type Data = { recipe: Recipe; versions: RecipeVersion[]; items: RecipeItem[] };
@@ -193,6 +194,8 @@ export function RecipeDetailPage() {
             </Actions>
           )}
         </Card>
+
+        <TheoreticalCost versionId={selected.id} />
 
         <Card>
           <h2>Historial de versiones</h2>
