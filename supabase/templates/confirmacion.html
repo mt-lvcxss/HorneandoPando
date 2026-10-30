@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="es">
+  <body style="font-family: Arial, sans-serif; color: #1f2933; line-height: 1.5;">
+    <h2>Confirma tu cuenta en Horneando Pando</h2>
+    <p>Recibimos una solicitud para crear una cuenta con este correo.</p>
+    <p>
+      <a href="{{ .SiteURL }}/auth/confirmado?token_hash={{ .TokenHash }}&type=email"
+         style="background:#7a4b2a;color:#fff;padding:10px 18px;border-radius:6px;text-decoration:none;">
+        Confirmar mi correo
+      </a>
+    </p>
+    <p>El enlace es de un solo uso y vence en 1 hora.</p>
+    <p>Si no creaste esta cuenta, ignora este mensaje: no se activará nada.</p>
+  </body>
+</html>

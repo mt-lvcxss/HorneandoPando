@@ -1,0 +1,131 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+}
+
+.sidebar {
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-5) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.brand img {
+  width: 30px;
+  height: 30px;
+}
+
+.businessName {
+  display: block;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.navLink {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.navLink:hover {
+  background: var(--color-surface-muted);
+}
+
+.navLinkActive {
+  background: var(--color-surface-muted);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.sidebarFooter {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+}
+
+.connection {
+  color: var(--color-text-muted);
+}
+
+.offline {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.main {
+  padding: var(--space-6);
+  max-width: 1100px;
+  width: 100%;
+}
+
+.topbar {
+  display: none;
+}
+
+.menuButton {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  font: inherit;
+}
+
+/* Móvil: barra superior compacta y menú desplegable. */
+@media (max-width: 800px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .sidebar {
+    display: none;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .sidebarOpen {
+    display: flex;
+  }
+
+  .sidebar .brand {
+    display: none;
+  }
+
+  .main {
+    padding: var(--space-4);
+  }
+}

@@ -1,0 +1,22 @@
+# Dependencias y compilación
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Secretos y configuración local (nunca al repositorio)
+.env
+.env.*
+!.env.example
+!.env.test.example
+supabase/.temp/
+supabase/.branches/
+
+# Configuración personal de Claude Code
+.claude/settings.local.json
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
