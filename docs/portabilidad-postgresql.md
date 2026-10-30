@@ -3,6 +3,8 @@
 La aplicación usa Supabase como backend de referencia, pero la base de datos y el frontend están
 diseñados para no quedar atados a él.
 
+================================================================================
+
 ## Qué es portable y qué depende de Supabase
 
 | Componente | Portable | Detalle |
@@ -15,6 +17,8 @@ diseñados para no quedar atados a él.
 | API HTTP de datos | ⚠️ PostgREST | Supabase usa PostgREST, que también existe como software libre independiente. |
 | Envío de códigos (`supabase/functions/send-device-code`) | ⚠️ Deno | Es un manejador HTTP estándar; corre en cualquier entorno Deno con otras variables. |
 
+================================================================================
+
 ## Requisitos mínimos de PostgreSQL
 
 - Versión **15 o superior** (se usan `gen_random_uuid()`, `sha256()`, columnas `identity`, `on conflict`).
@@ -25,12 +29,16 @@ Proveedores compatibles en principio (no probados aún): PostgreSQL propio, Neon
 PostgreSQL, Google Cloud SQL, Azure Database for PostgreSQL, Supabase autoalojado. Antes de usar uno,
 ejecutar las pruebas con `TEST_DATABASE_URL` apuntando a él (ver abajo).
 
+================================================================================
+
 ## Instalar el esquema en un PostgreSQL sin Supabase
 
 ```bash
 psql "$DATABASE_URL" -f database/compat/postgres-sin-supabase.sql
 for f in supabase/migrations/*.sql; do psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"; done
 ```
+
+================================================================================
 
 ## Contrato para un backend propio
 
@@ -54,6 +62,8 @@ Además debe:
 
 PostgREST hace exactamente esto a partir de un JWT, por lo que es la alternativa más directa.
 
+================================================================================
+
 ## Verificar un PostgreSQL concreto
 
 Las pruebas de base de datos pueden ejecutarse contra cualquier servidor en vez de PGlite:
@@ -67,3 +77,5 @@ TEST_DATABASE_URL=postgresql://usuario:clave@servidor:5432/postgres npm run test
 
 Cada prueba crea y elimina una base de datos temporal (`hp_test_...`). El usuario necesita permiso para
 crear bases de datos y roles. **No usar un servidor con datos reales.**
+
+================================================================================

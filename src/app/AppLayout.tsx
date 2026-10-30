@@ -11,7 +11,9 @@ import styles from './layout.module.css';
 // Solo se listan módulos que ya funcionan. Los siguientes se agregan al completarse cada etapa.
 const NAV_ITEMS = [
   { to: '/', label: 'Inicio', end: true },
+  { to: '/ingredientes', label: 'Ingredientes', end: false },
   { to: '/configuracion/negocio', label: 'Datos del negocio', end: false },
+  { to: '/configuracion/operacion', label: 'Configuración', end: false },
 ];
 
 export function AppLayout() {

@@ -26,8 +26,9 @@ export function DashboardPage() {
           código enviado a tu correo.
         </p>
         <p>
-          Los módulos de ingredientes, compras, inventario, recetas y producción se habilitarán en la siguiente etapa del
-          desarrollo. Este panel mostrará pedidos, alertas de inventario y finanzas cuando esos módulos registren datos reales.
+          Ya puedes registrar tus <Link to="/ingredientes">ingredientes</Link> con sus presentaciones. Compras, inventario,
+          recetas y producción se irán habilitando a medida que avance el desarrollo. Este panel mostrará pedidos, alertas de
+          inventario y finanzas cuando esos módulos registren datos reales.
         </p>
       </Card>
     </>

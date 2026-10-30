@@ -2,6 +2,8 @@
 
 Guía paso a paso. Los secretos **nunca** se pegan en el chat, en el código ni en archivos versionados.
 
+================================================================================
+
 ## 1. Crear los proyectos
 
 En [supabase.com](https://supabase.com) → *New project* (plan gratuito), dos veces:
@@ -12,6 +14,8 @@ En [supabase.com](https://supabase.com) → *New project* (plan gratuito), dos v
 | `horneando-prod` | Datos reales del piloto | South America (São Paulo) |
 
 Guarda la contraseña de la base de datos de cada uno en el administrador de contraseñas de tu navegador.
+
+================================================================================
 
 ## 2. Datos que necesita el desarrollo
 
@@ -44,6 +48,8 @@ TEST_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 TEST_SUPABASE_SECRET_KEY=sb_secret_...
 ```
 
+================================================================================
+
 ## 3. Vincular y aplicar migraciones
 
 En la terminal de Claude Code (el prefijo `!` ejecuta el comando en la sesión):
@@ -56,6 +62,8 @@ En la terminal de Claude Code (el prefijo `!` ejecuta el comando en la sesión):
 
 `link` pedirá la contraseña de la base de datos. Para producción se repite con `<ref-prod>` solo
 cuando una etapa esté validada en pruebas.
+
+================================================================================
 
 ## 4. Autenticación (panel de Supabase → Authentication)
 
@@ -80,12 +88,16 @@ Cuando configures Resend, copia el contenido de `supabase/templates/` para tener
 - Remitente: una dirección del dominio verificado (p. ej. `no-responder@tudominio.cl`).
 - Luego, en *Rate Limits*, subir el límite de correos por hora (por defecto es muy bajo).
 
+================================================================================
+
 ## 5. Resend
 
 1. Crear cuenta en [resend.com](https://resend.com) (plan gratuito: 100 correos/día, 3.000/mes).
 2. *Domains → Add domain* con tu dominio `.cl` y agregar los registros DNS que indica Resend.
    Sin dominio verificado solo se puede enviar a tu propio correo (suficiente para pruebas individuales).
 3. *API Keys → Create*: permiso solo de envío.
+
+================================================================================
 
 ## 6. Edge Function `send-device-code`
 
@@ -101,6 +113,8 @@ npx supabase secrets set RESEND_API_KEY=<api-key>      # este, en tu propia term
 **Sin Resend (desarrollo):** `npm run codigo-dispositivo -- <correo>` muestra el código en la terminal
 (requiere `.env.test.local`; solo proyecto de pruebas).
 
+================================================================================
+
 ## 7. Administrador de la plataforma
 
 El panel de administración llega en la Etapa 6. Para designar un administrador (un usuario distinto de
@@ -110,3 +124,5 @@ cualquier emprendedor), en *SQL Editor*:
 insert into private.platform_admins (user_id, note)
 values ('<uuid del usuario>', 'Administrador principal');
 ```
+
+================================================================================

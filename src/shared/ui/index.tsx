@@ -60,9 +60,10 @@ type SelectFieldProps = {
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
+  disabled?: boolean;
 };
 
-export function SelectField({ label, hint, value, onChange, options }: SelectFieldProps) {
+export function SelectField({ label, hint, value, onChange, options, disabled }: SelectFieldProps) {
   const id = useId();
   return (
     <div className={styles.field}>
@@ -70,7 +71,13 @@ export function SelectField({ label, hint, value, onChange, options }: SelectFie
         {label}
       </label>
       {hint && <span className={styles.hint}>{hint}</span>}
-      <select id={id} className={styles.input} value={value} onChange={(e) => onChange(e.target.value)}>
+      <select
+        id={id}
+        className={styles.input}
+        value={value}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value)}
+      >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
@@ -91,6 +98,86 @@ export function Alert({ tone = 'info', title, children }: AlertProps) {
     </div>
   );
 }
+
+type TextAreaFieldProps = {
+  label: string;
+  hint?: string;
+  value: string;
+  onChange: (value: string) => void;
+  maxLength?: number;
+  rows?: number;
+};
+
+export function TextAreaField({ label, hint, value, onChange, maxLength, rows = 3 }: TextAreaFieldProps) {
+  const id = useId();
+  return (
+    <div className={styles.field}>
+      <label className={styles.label} htmlFor={id}>
+        {label}
+      </label>
+      {hint && <span className={styles.hint}>{hint}</span>}
+      <textarea
+        id={id}
+        className={styles.input}
+        value={value}
+        rows={rows}
+        maxLength={maxLength}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  );
+}
+
+type CheckboxFieldProps = { label: string; hint?: string; checked: boolean; onChange: (checked: boolean) => void };
+
+export function CheckboxField({ label, hint, checked, onChange }: CheckboxFieldProps) {
+  return (
+    <label className={styles.checkbox}>
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <span>
+        <span className={styles.label}>{label}</span>
+        {hint && <span className={`${styles.hint} ${styles.block}`}>{hint}</span>}
+      </span>
+    </label>
+  );
+}
+
+export function Badge({ tone, children }: { tone?: 'warning' | 'success'; children: ReactNode }) {
+  const toneClass = tone === 'warning' ? styles.badgeWarning : tone === 'success' ? styles.badgeSuccess : '';
+  return <span className={`${styles.badge} ${toneClass}`}>{children}</span>;
+}
+
+export function PageHeader({ title, children }: { title: string; children?: ReactNode }) {
+  return (
+    <div className={styles.pageHeader}>
+      <h1>{title}</h1>
+      {children && <div className={styles.actions}>{children}</div>}
+    </div>
+  );
+}
+
+/** Tabla con desplazamiento horizontal en pantallas angostas. */
+export function Table({ children }: { children: ReactNode }) {
+  return (
+    <div className={styles.tableWrap}>
+      <table className={styles.table}>{children}</table>
+    </div>
+  );
+}
+
+export function Actions({ children }: { children: ReactNode }) {
+  return <div className={styles.actions}>{children}</div>;
+}
+
+export function FieldRow({ children }: { children: ReactNode }) {
+  return <div className={styles.fieldRow}>{children}</div>;
+}
+
+export function Stack({ children }: { children: ReactNode }) {
+  return <div className={styles.stack}>{children}</div>;
+}
+
+export const uiClasses = { numeric: styles.numeric, muted: styles.muted, subsection: styles.subsection };
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
   return <section className={`${styles.card} ${className ?? ''}`}>{children}</section>;

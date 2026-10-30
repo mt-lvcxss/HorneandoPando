@@ -199,3 +199,256 @@ export const accountApi = {
     return { data: error ? null : true, error };
   },
 };
+
+// ---------------------------------------------------------------------------
+// Configuración operacional
+// ---------------------------------------------------------------------------
+
+export type ChargeDistribution = 'by_value' | 'by_quantity';
+
+export type OperationSettings = {
+  finished_goods_tracking: boolean;
+  charge_distribution_default: ChargeDistribution;
+  updated_at: string;
+};
+
+export const settingsApi = {
+  async get(): Promise<Result<OperationSettings>> {
+    const { data, error } = await requireSupabase().from('account_settings').select('*').maybeSingle();
+    return { data: data as OperationSettings | null, error };
+  },
+
+  async update(input: Omit<OperationSettings, 'updated_at'>): Promise<Result<OperationSettings>> {
+    const { data, error } = await requireSupabase().rpc('update_operation_settings', {
+      p_finished_goods_tracking: input.finished_goods_tracking,
+      p_charge_distribution_default: input.charge_distribution_default,
+    });
+    return { data: data as OperationSettings | null, error };
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Catálogo: unidades, ingredientes, presentaciones y equivalencias
+// ---------------------------------------------------------------------------
+
+export type Dimension = 'mass' | 'volume' | 'count';
+
+export type Unit = { code: string; dimension: Dimension; to_base: number; label: string; sort_order: number };
+
+export type Ingredient = {
+  id: string;
+  name: string;
+  dimension: Dimension;
+  notes: string | null;
+  archived_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Brand = {
+  id: string;
+  ingredient_id: string;
+  name: string;
+  notes: string | null;
+  archived_at: string | null;
+  created_at: string;
+};
+
+export type Presentation = {
+  id: string;
+  ingredient_id: string;
+  brand_id: string;
+  description: string | null;
+  quantity: number;
+  unit: string;
+  reference_price_clp: number | null;
+  reference_price_date: string | null;
+  archived_at: string | null;
+  created_at: string;
+};
+
+export type Equivalence = {
+  id: string;
+  ingredient_id: string;
+  other_quantity: number;
+  other_unit: string;
+  ingredient_quantity: number;
+  ingredient_unit: string;
+  other_dimension: Dimension;
+  note: string | null;
+  created_at: string;
+  superseded_at: string | null;
+};
+
+export type IngredientInput = {
+  name: string;
+  dimension: Dimension;
+  notes: string | null;
+};
+
+export type PresentationInput = {
+  quantity: number;
+  unit: string;
+  description: string | null;
+  referencePriceClp: number | null;
+  referencePriceDate: string | null;
+};
+
+export type BrandInput = { name: string; notes: string | null };
+
+export type QuantityWithUnit = { quantity: number; unit: string };
+
+export const catalogApi = {
+  async listUnits(): Promise<Result<Unit[]>> {
+    const { data, error } = await requireSupabase().from('units').select('*').order('sort_order');
+    return { data: data as Unit[] | null, error };
+  },
+
+  async listIngredients(): Promise<Result<Ingredient[]>> {
+    const { data, error } = await requireSupabase().from('ingredients').select('*').order('name');
+    return { data: data as Ingredient[] | null, error };
+  },
+
+  async getIngredient(id: string): Promise<Result<Ingredient>> {
+    const { data, error } = await requireSupabase().from('ingredients').select('*').eq('id', id).maybeSingle();
+    return { data: data as Ingredient | null, error };
+  },
+
+  async createIngredient(idempotencyKey: string, input: IngredientInput): Promise<Result<Ingredient>> {
+    const { data, error } = await requireSupabase().rpc('create_ingredient', {
+      p_idempotency_key: idempotencyKey,
+      ...ingredientParams(input),
+    });
+    return { data: data as Ingredient | null, error };
+  },
+
+  async updateIngredient(id: string, input: IngredientInput): Promise<Result<Ingredient>> {
+    const { data, error } = await requireSupabase().rpc('update_ingredient', {
+      p_ingredient_id: id,
+      ...ingredientParams(input),
+    });
+    return { data: data as Ingredient | null, error };
+  },
+
+  async setIngredientArchived(id: string, archived: boolean): Promise<Result<Ingredient>> {
+    const { data, error } = await requireSupabase().rpc('set_ingredient_archived', {
+      p_ingredient_id: id,
+      p_archived: archived,
+    });
+    return { data: data as Ingredient | null, error };
+  },
+
+  async listBrands(ingredientId?: string): Promise<Result<Brand[]>> {
+    let query = requireSupabase().from('brands').select('*').order('name');
+    if (ingredientId) query = query.eq('ingredient_id', ingredientId);
+    const { data, error } = await query;
+    return { data: data as Brand[] | null, error };
+  },
+
+  async createBrand(idempotencyKey: string, ingredientId: string, input: BrandInput): Promise<Result<Brand>> {
+    const { data, error } = await requireSupabase().rpc('create_brand', {
+      p_idempotency_key: idempotencyKey,
+      p_ingredient_id: ingredientId,
+      p_name: input.name,
+      p_notes: input.notes,
+    });
+    return { data: data as Brand | null, error };
+  },
+
+  async updateBrand(id: string, input: BrandInput): Promise<Result<Brand>> {
+    const { data, error } = await requireSupabase().rpc('update_brand', {
+      p_brand_id: id,
+      p_name: input.name,
+      p_notes: input.notes,
+    });
+    return { data: data as Brand | null, error };
+  },
+
+  async setBrandArchived(id: string, archived: boolean): Promise<Result<Brand>> {
+    const { data, error } = await requireSupabase().rpc('set_brand_archived', { p_brand_id: id, p_archived: archived });
+    return { data: data as Brand | null, error };
+  },
+
+  async listPresentations(ingredientId?: string): Promise<Result<Presentation[]>> {
+    let query = requireSupabase().from('presentations').select('*').order('created_at');
+    if (ingredientId) query = query.eq('ingredient_id', ingredientId);
+    const { data, error } = await query;
+    return { data: data as Presentation[] | null, error };
+  },
+
+  async createPresentation(idempotencyKey: string, brandId: string, input: PresentationInput): Promise<Result<Presentation>> {
+    const { data, error } = await requireSupabase().rpc('create_presentation', {
+      p_idempotency_key: idempotencyKey,
+      p_brand_id: brandId,
+      ...presentationParams(input),
+    });
+    return { data: data as Presentation | null, error };
+  },
+
+  async updatePresentation(id: string, input: PresentationInput): Promise<Result<Presentation>> {
+    const { data, error } = await requireSupabase().rpc('update_presentation', {
+      p_presentation_id: id,
+      ...presentationParams(input),
+    });
+    return { data: data as Presentation | null, error };
+  },
+
+  async setPresentationArchived(id: string, archived: boolean): Promise<Result<Presentation>> {
+    const { data, error } = await requireSupabase().rpc('set_presentation_archived', {
+      p_presentation_id: id,
+      p_archived: archived,
+    });
+    return { data: data as Presentation | null, error };
+  },
+
+  async listEquivalences(ingredientId: string): Promise<Result<Equivalence[]>> {
+    const { data, error } = await requireSupabase()
+      .from('ingredient_equivalences')
+      .select('*')
+      .eq('ingredient_id', ingredientId)
+      .order('created_at', { ascending: false });
+    return { data: data as Equivalence[] | null, error };
+  },
+
+  async setEquivalence(
+    idempotencyKey: string,
+    ingredientId: string,
+    a: QuantityWithUnit,
+    b: QuantityWithUnit,
+    note: string | null,
+  ): Promise<Result<Equivalence>> {
+    const { data, error } = await requireSupabase().rpc('set_ingredient_equivalence', {
+      p_idempotency_key: idempotencyKey,
+      p_ingredient_id: ingredientId,
+      p_quantity_a: a.quantity,
+      p_unit_a: a.unit,
+      p_quantity_b: b.quantity,
+      p_unit_b: b.unit,
+      p_note: note,
+    });
+    return { data: data as Equivalence | null, error };
+  },
+
+  async retireEquivalence(id: string): Promise<Result<Equivalence>> {
+    const { data, error } = await requireSupabase().rpc('retire_ingredient_equivalence', { p_equivalence_id: id });
+    return { data: data as Equivalence | null, error };
+  },
+};
+
+function ingredientParams(input: IngredientInput) {
+  return {
+    p_name: input.name,
+    p_dimension: input.dimension,
+    p_notes: input.notes,
+  };
+}
+
+function presentationParams(input: PresentationInput) {
+  return {
+    p_quantity: input.quantity,
+    p_unit: input.unit,
+    p_description: input.description,
+    p_reference_price_clp: input.referencePriceClp,
+    p_reference_price_date: input.referencePriceDate,
+  };
+}

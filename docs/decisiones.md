@@ -3,7 +3,7 @@
 Registro de decisiones importantes: qué se decidió, por qué y qué consecuencias tiene.
 Las decisiones nuevas se agregan al final; las reemplazadas se marcan como tales, sin borrarlas.
 
----
+================================================================================
 
 ## D-001 · Sin Docker: dos proyectos Supabase en la nube
 **Fecha:** 2026-10-30 · **Estado:** vigente (el piloto con emprendedores reales queda pospuesto, ver D-014)
@@ -18,6 +18,8 @@ permisos de administrador. Supabase local (`supabase start`) necesita Docker y v
 **Consecuencia:** las pruebas de base de datos locales se hacen con PGlite (ver D-010) y las de
 integración contra `horneando-test`.
 
+================================================================================
+
 ## D-002 · Operaciones críticas como funciones PostgreSQL (RPC)
 **Fecha:** 2026-10-30 · **Estado:** vigente
 
@@ -31,6 +33,8 @@ exportaciones administrativas).
 **Reglas para toda función `SECURITY DEFINER`:** `set search_path = ''`, nombres calificados con esquema,
 validación de la cuenta con `private.require_account_id()` al inicio, y `revoke` explícito a `public`/`anon`.
 
+================================================================================
+
 ## D-003 · Aislamiento por cuenta en tres capas
 **Fecha:** 2026-10-30 · **Estado:** vigente
 
@@ -41,6 +45,8 @@ validación de la cuenta con `private.require_account_id()` al inicio, y `revoke
    la base de datos impide relacionar entidades de cuentas distintas, incluso desde funciones privilegiadas.
 
 Los helpers internos viven en el esquema `private`, que la Data API no expone.
+
+================================================================================
 
 ## D-004 · Verificación por nuevo dispositivo (diseño propio)
 **Fecha:** 2026-10-30 · **Estado:** vigente
@@ -62,6 +68,8 @@ puede abrirse en otro equipo.
 
 **Limitación:** si el usuario borra los datos del navegador, se le pedirá verificar otra vez.
 
+================================================================================
+
 ## D-005 · Expiración por inactividad validada en el servidor
 **Fecha:** 2026-10-30 · **Estado:** vigente
 
@@ -69,6 +77,8 @@ El timeout de sesión nativo de Supabase es una función de pago. Se implementa 
 `session_guards.last_activity_at` y un límite por tipo de usuario (emprendedor 60 min, administrador 30 min).
 El frontend informa actividad (`touch_session`) solo ante interacción real del usuario, como máximo cada
 2 minutos, y avisa 5 minutos antes del cierre. Una sesión vencida no se puede revivir: hay que volver a ingresar.
+
+================================================================================
 
 ## D-006 · Idempotencia con claves por formulario
 **Fecha:** 2026-10-30 · **Estado:** vigente
@@ -81,11 +91,15 @@ Cada formulario de operación crítica genera un UUID al abrirse. La RPC llama a
 Dos llamadas simultáneas con la misma clave se serializan por el índice único. La idempotencia no
 reemplaza la autorización ni la validación.
 
+================================================================================
+
 ## D-007 · Auditoría inmutable en esquema privado
 **Fecha:** 2026-10-30 · **Estado:** vigente
 
 `private.audit_log` es solo de inserción: triggers bloquean `UPDATE`, `DELETE` y `TRUNCATE` incluso para el
 dueño de la base de datos en el flujo normal. No se registran secretos, contraseñas ni códigos.
+
+================================================================================
 
 ## D-008 · Representación numérica
 **Fecha:** 2026-10-30 · **Estado:** vigente
@@ -95,6 +109,8 @@ dueño de la base de datos en el flujo normal. No se registran secretos, contras
 - Costos unitarios: `numeric` de alta precisión; el redondeo a pesos se hace solo al mostrar o al registrar
   un importe monetario, de forma explícita.
 - Costo desconocido: `NULL` más un estado (`incompleto` / `provisional`), nunca 0.
+
+================================================================================
 
 ## D-009 · Correo con Resend y enlaces `token_hash`
 **Fecha:** 2026-10-30 · **Estado:** vigente
@@ -110,6 +126,8 @@ dueño de la base de datos en el flujo normal. No se registran secretos, contras
   también los enlaces de las plantillas por defecto (sesión en el fragmento y `code` PKCE), así que funciona
   sin SMTP. Los tokens se borran de la barra de direcciones al procesarlos (`src/db/authLink.ts`).
 
+================================================================================
+
 ## D-010 · Pruebas de base de datos con PGlite
 **Fecha:** 2026-10-30 · **Estado:** vigente
 
@@ -121,11 +139,15 @@ stub mínimo del entorno de Supabase (`tests/db/supabase-stub.sql`: roles, `auth
 producciones simultáneas) deben ejecutarse contra `horneando-test`. PGlite usa PostgreSQL 18 y Supabase
 PostgreSQL 17: no se deben usar funciones exclusivas de la versión 18.
 
+================================================================================
+
 ## D-011 · Administradores y emprendedores son usuarios distintos
 **Fecha:** 2026-10-30 · **Estado:** vigente
 
 `private.platform_admins` no tiene políticas ni permisos para clientes: solo se modifica con SQL directo.
 Un trigger impide que un usuario sea a la vez administrador y dueño de una cuenta de negocio.
+
+================================================================================
 
 ## D-012 · Publicación del frontend para el piloto
 **Fecha:** 2026-10-30 · **Estado:** pospuesta (ver D-014)
@@ -135,12 +157,16 @@ hosting estático gratuito (candidato: Cloudflare Pages) con el dominio `.cl` de
 computador de desarrollo ni la base de datos. Esto adelanta lo que la especificación (sección 35) dejaba
 para después de validar la primera fase; el usuario lo aprobó en principio el 2026-10-30.
 
+================================================================================
+
 ## D-013 · Zona horaria
 **Fecha:** 2026-10-30 · **Estado:** vigente
 
 Por defecto `America/Santiago` (identificador IANA), configurable por negocio. Chile continental alterna
 UTC-3 (verano) y UTC-4 (invierno); un desfase fijo produciría horas erróneas. Las fechas se guardan como
 `timestamptz` (UTC) y se muestran en la zona del negocio.
+
+================================================================================
 
 ## D-014 · Dominio pospuesto; preparación para comercializar
 **Fecha:** 2026-10-30 · **Estado:** vigente
@@ -153,6 +179,8 @@ emprender con ella. La primera fase se usa en `localhost` conectada a Supabase.
   se define por configuración. Lista de pasos: `docs/dominio-y-publicacion.md`.
 - Marca configurable: `VITE_APP_NAME`, `VITE_SUPPORT_EMAIL` (frontend) y `APP_NAME` (Edge Function).
 - No se implementan términos legales, cobros ni facturación sin especificación (regla 9).
+
+================================================================================
 
 ## D-015 · Portabilidad a otros PostgreSQL
 **Fecha:** 2026-10-30 · **Estado:** vigente
@@ -169,6 +197,8 @@ emprender con ella. La primera fase se usa en `localhost` conectada a Supabase.
 
 Detalle: `docs/portabilidad-postgresql.md`.
 
+================================================================================
+
 ## D-016 · Código de dispositivo en desarrollo sin correo
 **Fecha:** 2026-10-30 · **Estado:** vigente
 
@@ -179,3 +209,76 @@ proyecto de **pruebas** y muestra el código en la terminal.
 No debilita la seguridad: la clave secreta ya otorga acceso total a ese proyecto, y la verificación sigue
 siendo obligatoria. El script se niega a operar si la app apunta a un proyecto distinto del de pruebas.
 La clave secreta de producción nunca debe estar en el equipo de desarrollo.
+
+================================================================================
+
+## D-017 · Alcance confirmado de la Etapa 3
+**Fecha:** 2026-10-30 · **Estado:** vigente
+
+Plan: `docs/plan-etapa-3.md`. Respuestas del usuario a las preguntas abiertas:
+- **Unidades:** tres dimensiones (masa `g`, volumen `ml`, conteo `unidad`) con conversiones fijas dentro de
+  cada dimensión. Entre dimensiones solo mediante una equivalencia definida o confirmada por el usuario,
+  por ingrediente. Las equivalencias no se editan: una nueva reemplaza a la anterior y la historia se conserva.
+- **Cargos adicionales:** solo los criterios explícitos de la especificación: distribución por valor o por
+  cantidad física; para envases consumidos en parte, proporcional al consumo o íntegro en el primer uso.
+- **Embalajes y etiquetas:** líneas de costo ingresadas a mano en cada simulación o producción (sin stock).
+- **Precio sugerido:** dos métodos (margen sobre el precio y recargo sobre el costo), uno marcado como
+  recomendado, con un porcentaje personalizable por método. Detalle a confirmar en la subetapa 3.4.
+- **Productos terminados:** seguimiento **desactivado** por defecto en cuentas nuevas.
+
+================================================================================
+
+## D-018 · Catálogo: escritura por RPC, lectura directa con RLS
+**Fecha:** 2026-10-30 · **Estado:** vigente
+
+Ingredientes, presentaciones, equivalencias y configuración se leen con `select` protegido por RLS y se
+escriben solo mediante RPC (validación, auditoría y, en las altas, clave de idempotencia). Así una
+presentación usada en compras podrá bloquear cambios de contenido desde el servidor (subetapa 3.2).
+- La dimensión de un ingrediente solo se puede cambiar mientras no tenga presentaciones ni equivalencias.
+- El nombre de un ingrediente es único por cuenta entre los no archivados.
+- Los ingredientes y presentaciones no se borran: se archivan.
+- El stock mínimo se guarda en la unidad base de la dimensión (g, ml o unidad).
+- Criterio de costo de reposición por defecto: precio de la compra más reciente (configurable, con
+  excepción por ingrediente). Distribución de cargos por defecto: por valor de compra.
+
+================================================================================
+
+## D-019 · Ajustes del usuario al catálogo, al stock y a los costos
+**Fecha:** 2026-10-30 · **Estado:** vigente · Reemplaza en parte a D-017 y D-018
+
+Tras revisar la subetapa 3.1, el usuario decidió:
+- **Categoría obligatoria.** El ingrediente es el producto genérico que usan las recetas («Harina sin polvos»,
+  «Polvos de hornear»); sus marcas y tamaños son presentaciones. La categoría agrupa ingredientes y es obligatoria.
+  Se reutiliza la forma ya existente si se escribe con otras mayúsculas o espacios («harinas» → «Harinas»).
+  Los ingredientes de prueba que no tenían categoría quedaron como «Sin categoría» (no se adivina una).
+- **Sin stock mínimo ni alertas por mínimo** (se aparta de la sección 7.10 de la especificación por decisión del
+  usuario). En su lugar, la aplicación muestra siempre la cantidad disponible de cada ingrediente y avisa
+  **solo cuando un ingrediente se agota** (subetapa 3.2).
+- **Sin costo de reposición** (se aparta de la sección 9.8). Se eliminan el criterio global y las excepciones por
+  ingrediente. Los tipos de costo que quedan son: teórico, estimado (simulación), histórico (producción real) y
+  corregido (revaloración). Una revaloración solo usa precios históricos verificables o un costo provisional
+  explícito del usuario, rotulado como tal.
+
+Migración: `20261031100000_catalogo_ajustes.sql` (la anterior ya estaba aplicada y no se edita).
+
+================================================================================
+
+## D-020 · Jerarquía Ingrediente → Marca → Presentación
+**Fecha:** 2026-10-30 · **Estado:** vigente · Reemplaza la parte de categorías de D-019
+
+El usuario pidió llamar «Ingrediente» a lo que era la categoría y «Marca» a lo que era el ingrediente. Se
+implementó como cambio de modelo, no solo de etiquetas:
+- **Ingrediente** (`ingredients`): el producto genérico que piden las recetas («Harina», «Polvos de hornear»).
+  Define la dimensión (peso, volumen o unidades) y las equivalencias. Nombre único entre los activos.
+- **Marca** (`brands`): cada marca de ese ingrediente («Selecta», «Collico»). Nombre único por ingrediente entre
+  las activas; la misma marca puede existir en ingredientes distintos. Sin marca: escribir, por ejemplo, «Granel».
+- **Presentación** (`presentations`): envase y tamaño de una marca, con su precio de referencia. Una FK compuesta
+  `(account_id, brand_id, ingredient_id)` garantiza que la marca pertenece al mismo ingrediente.
+
+**Por qué:** así una receta pide «Harina» y la producción puede descontar envases de cualquier marca. Si solo se
+renombraban las etiquetas, cada receta habría quedado atada a una marca concreta.
+
+Se elimina la columna de categoría. Migración: `20261031110000_ingredientes_marcas.sql`, aplicada con el catálogo
+vacío (la migración se niega a correr si hay datos de catálogo).
+
+================================================================================

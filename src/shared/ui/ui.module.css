@@ -173,7 +173,7 @@
 
 .dialogActions {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-3);
   justify-content: flex-end;
   flex-wrap: wrap;
 }
@@ -184,4 +184,127 @@
   place-items: center;
   min-height: 40vh;
   color: var(--color-text-muted);
+}
+
+/* ---------- Tablas ---------- */
+.tableWrap {
+  overflow-x: auto;
+  margin-bottom: var(--space-4);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.table th {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.table td.numeric,
+.table th.numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Etiquetas ---------- */
+.badge {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--color-control-border);
+  color: var(--color-text-muted);
+}
+
+.badgeWarning {
+  border-color: var(--color-warning-border);
+  color: var(--color-warning);
+}
+
+.badgeSuccess {
+  border-color: var(--color-success-border);
+  color: var(--color-success);
+}
+
+/* ---------- Diseño ---------- */
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.pageHeader h1 {
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  align-items: center;
+  margin: var(--space-3) 0;
+}
+
+/* Dentro de una tabla o encabezado, los botones no necesitan margen vertical. */
+.table .actions,
+.pageHeader .actions {
+  margin: 0;
+}
+
+/* Bloque dentro de una tarjeta (por ejemplo, cada marca): separado del anterior por una línea. */
+.subsection {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0 var(--space-3);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.checkbox {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
+  cursor: pointer;
+}
+
+.checkbox input {
+  margin-top: 0.3em;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.block {
+  display: block;
 }

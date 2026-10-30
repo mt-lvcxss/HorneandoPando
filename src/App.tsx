@@ -11,7 +11,10 @@ import { RegisterPage } from './auth/pages/RegisterPage';
 import { ResetPasswordPage } from './auth/pages/ResetPasswordPage';
 import { VerifyDevicePage } from './auth/pages/VerifyDevicePage';
 import { configResult } from './db/supabase';
+import { IngredientDetailPage } from './modules/ingredients/IngredientDetailPage';
+import { IngredientsPage } from './modules/ingredients/IngredientsPage';
 import { BusinessProfilePage } from './modules/settings/BusinessProfilePage';
+import { OperationSettingsPage } from './modules/settings/OperationSettingsPage';
 
 export function App() {
   if (!configResult.ok) return <ConfigErrorPage problems={configResult.problems} />;
@@ -30,7 +33,10 @@ export function App() {
           <Route element={<RequireAccount />}>
             <Route element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
+              <Route path="/ingredientes" element={<IngredientsPage />} />
+              <Route path="/ingredientes/:id" element={<IngredientDetailPage />} />
               <Route path="/configuracion/negocio" element={<BusinessProfilePage />} />
+              <Route path="/configuracion/operacion" element={<OperationSettingsPage />} />
             </Route>
           </Route>
 
