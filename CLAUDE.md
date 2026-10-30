@@ -160,8 +160,8 @@ Lee la sección 38 de `prompt_completo.md` para el detalle completo.
 | 7 | Integración, pruebas de concurrencia, seguridad, recorridos completos |
 | 8 | Entrega: documentación, migraciones, instrucciones, limitaciones |
 
-**Instrucción de inicio:** Comienza siempre por la Etapa 1. No escribas código hasta
-presentar el plan técnico y esperar confirmación.
+**Instrucción de inicio:** Revisa `docs/estado.md` para saber en qué etapa va el proyecto y
+continúa desde ahí. Antes de empezar una etapa nueva, presenta su plan y espera confirmación.
 
 ---
 
@@ -191,6 +191,7 @@ sustitución automática de ingredientes, contabilidad formal.
 ## Archivos de referencia
 
 - `prompt_completo.md` — especificación funcional completa (40 secciones), ubicada en la raíz del proyecto.
+  No la leas completa (son ~38.000 tokens): busca la sección necesaria (Grep) o lee solo las líneas que hagan falta.
 - `.env.example` — variables de entorno requeridas sin valores reales.
 - `supabase/migrations/` — migraciones SQL versionadas.
 - `docs/decisiones.md` — decisiones técnicas documentadas (crear si no existe).
