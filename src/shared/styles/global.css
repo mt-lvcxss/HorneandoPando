@@ -1,25 +1,37 @@
-/* Tokens de diseño: sobrio, legible, colores discretos. */
+/* Tokens de diseño: fondo gris oscuro, acentos en paleta pastel, alto contraste de lectura. */
 :root {
-  --color-bg: #f7f5f2;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f1ede8;
-  --color-border: #ddd6cd;
-  --color-text: #1f2933;
-  --color-text-muted: #5f6b76;
-  --color-primary: #7a4b2a;
-  --color-primary-hover: #643b1f;
-  --color-primary-contrast: #ffffff;
-  --color-focus: #2563eb;
+  color-scheme: dark;
 
-  --color-info-bg: #eef4fb;
-  --color-info-border: #b9cfe8;
-  --color-success-bg: #edf7ef;
-  --color-success-border: #b5dcbd;
-  --color-warning-bg: #fdf6e7;
-  --color-warning-border: #ecd28f;
-  --color-danger: #b42318;
-  --color-danger-bg: #fdf0ef;
-  --color-danger-border: #f0b9b4;
+  --color-bg: #2b2d31;
+  --color-surface: #35373d;
+  --color-surface-muted: #404249;
+  --color-input: #2f3136;
+  --color-border: #4b4e56;
+  /* Bordes de controles (campos, botones secundarios): contraste ≥ 3:1 con la tarjeta. */
+  --color-control-border: #80848e;
+  --color-text: #eceef1;
+  --color-text-muted: #b6bac2;
+
+  /* Pastel principal: durazno. Texto oscuro encima para buen contraste. */
+  --color-primary: #f6c3a1;
+  --color-primary-hover: #f9d3b9;
+  --color-primary-contrast: #26282c;
+  --color-focus: #a9c9f2;
+
+  /* Estados en pastel: el fondo es un tinte suave sobre el gris; el borde, el pastel puro. */
+  --color-info: #a9c9f2;
+  --color-info-bg: rgb(169 201 242 / 0.12);
+  --color-info-border: #a9c9f2;
+  --color-success: #b4e2c3;
+  --color-success-bg: rgb(180 226 195 / 0.12);
+  --color-success-border: #b4e2c3;
+  --color-warning: #f3dd9e;
+  --color-warning-bg: rgb(243 221 158 / 0.12);
+  --color-warning-border: #f3dd9e;
+  --color-danger: #f4adad;
+  --color-danger-bg: rgb(244 173 173 / 0.12);
+  --color-danger-border: #f4adad;
+  --color-accent-lavender: #cdbdf2;
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -31,7 +43,7 @@
   --space-6: 32px;
 
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --shadow-card: 0 1px 2px rgb(31 41 51 / 0.06), 0 1px 3px rgb(31 41 51 / 0.04);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.25), 0 2px 8px rgb(0 0 0 / 0.18);
 
   font-family: var(--font-sans);
   font-size: 16px;
@@ -73,6 +85,17 @@ p {
 
 a {
   color: var(--color-primary);
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+code {
+  background: var(--color-surface-muted);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  font-size: 0.9em;
 }
 
 :focus-visible {

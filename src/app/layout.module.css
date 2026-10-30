@@ -55,6 +55,7 @@
   background: var(--color-surface-muted);
   font-weight: 600;
   color: var(--color-primary);
+  box-shadow: inset 3px 0 0 var(--color-primary);
 }
 
 .sidebarFooter {
@@ -86,11 +87,12 @@
 
 .menuButton {
   background: none;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-control-border);
   border-radius: var(--radius-sm);
   min-height: 40px;
   padding: 0 var(--space-3);
   font: inherit;
+  color: var(--color-text);
 }
 
 /* Móvil: barra superior compacta y menú desplegable. */

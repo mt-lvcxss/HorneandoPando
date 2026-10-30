@@ -29,9 +29,9 @@
 }
 
 .secondary {
-  background: var(--color-surface);
+  background: transparent;
   color: var(--color-text);
-  border-color: var(--color-border);
+  border-color: var(--color-control-border);
 }
 
 .secondary:hover:not(:disabled) {
@@ -72,11 +72,15 @@
 .input {
   min-height: 42px;
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-control-border);
   border-radius: var(--radius-sm);
   font: inherit;
-  background: var(--color-surface);
+  background: var(--color-input);
   color: var(--color-text);
+}
+
+.input:focus {
+  border-color: var(--color-focus);
 }
 
 .input[aria-invalid='true'] {
@@ -91,6 +95,7 @@
 /* ---------- Avisos ---------- */
 .alert {
   border: 1px solid;
+  border-left-width: 4px;
   border-radius: var(--radius-sm);
   padding: var(--space-3) var(--space-4);
   margin-bottom: var(--space-4);
@@ -103,6 +108,22 @@
 .alertTitle {
   font-weight: 700;
   margin-bottom: var(--space-1);
+}
+
+.info .alertTitle {
+  color: var(--color-info);
+}
+
+.success .alertTitle {
+  color: var(--color-success);
+}
+
+.warning .alertTitle {
+  color: var(--color-warning);
+}
+
+.danger .alertTitle {
+  color: var(--color-danger);
 }
 
 .info {
@@ -138,7 +159,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgb(31 41 51 / 0.45);
+  background: rgb(0 0 0 / 0.6);
   display: grid;
   place-items: center;
   padding: var(--space-4);
