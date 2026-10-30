@@ -44,7 +44,14 @@ export function friendlyAuthError(error: unknown): string {
     case 'over_email_send_rate_limit':
       return 'Demasiados intentos. Espera unos minutos antes de volver a intentarlo.';
     case 'otp_expired':
+    case 'access_denied':
+    case 'flow_state_not_found':
+    case 'flow_state_expired':
       return 'El enlace venció o ya fue utilizado. Solicita uno nuevo.';
+    case 'link_incomplete':
+      return 'El enlace está incompleto. Ábrelo directamente desde el correo.';
+    case 'bad_code_verifier':
+      return 'Abre el enlace en el mismo navegador donde lo solicitaste, o solicita uno nuevo.';
     case 'same_password':
       return 'La nueva contraseña debe ser distinta de la anterior.';
   }

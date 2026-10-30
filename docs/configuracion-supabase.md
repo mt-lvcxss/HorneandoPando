@@ -68,7 +68,9 @@ cuando una etapa esté validada en pruebas.
 - *Secure password change*: activado.
 - *Minimum password length*: 8, con letras y números.
 
-**Email Templates**: copiar el contenido de `supabase/templates/`:
+**Email Templates** — *opcional; Supabase solo permite editarlas con un SMTP propio configurado.*
+Sin SMTP la app funciona igual con las plantillas por defecto (en inglés): reconoce sus enlaces.
+Cuando configures Resend, copia el contenido de `supabase/templates/` para tener los correos en español:
 - *Confirm signup* → `confirmacion.html` (asunto: "Confirma tu cuenta").
 - *Reset password* → `recuperacion.html` (asunto: "Restablece tu contraseña").
 - *Password changed* (notificación) → `contrasena_cambiada.html`.

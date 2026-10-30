@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { authApi } from '../../db/api';
 import { friendlyAuthError } from '../../shared/errors';
 import { Alert, Button, Loading, TextField } from '../../shared/ui';
@@ -9,7 +9,6 @@ import { AuthLayout } from './AuthLayout';
 type Step = 'verifying' | 'form' | 'invalid' | 'done';
 
 export function ResetPasswordPage() {
-  const [params] = useSearchParams();
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>('verifying');
   const [linkError, setLinkError] = useState<string | null>(null);
@@ -22,13 +21,7 @@ export function ResetPasswordPage() {
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-    const tokenHash = params.get('token_hash');
-    if (!tokenHash) {
-      setLinkError('El enlace está incompleto. Ábrelo directamente desde el correo.');
-      setStep('invalid');
-      return;
-    }
-    void authApi.openRecoveryLink(tokenHash).then(({ error }) => {
+    void authApi.completeAuthLink(new URL(window.location.href), 'recovery').then(({ error }) => {
       if (error) {
         setLinkError(friendlyAuthError(error));
         setStep('invalid');
@@ -36,7 +29,7 @@ export function ResetPasswordPage() {
         setStep('form');
       }
     });
-  }, [params]);
+  }, []);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();

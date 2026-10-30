@@ -20,13 +20,15 @@ Actualizado: 2026-10-30.
 | Servidor local (`npm run dev`) | Responde en `http://localhost:5173` |
 | CI en GitHub Actions (incluye PostgreSQL 15/16/17) | Configurado (aún no ejecutado en GitHub) |
 
-### Pendiente para cerrar la Etapa 2
+### Cierre de la Etapa 2 — ✅ cerrada el 2026-10-30
 | Pendiente | Bloqueado por |
 |---|---|
-| Aplicar la migración en `horneando-test` | Crear proyecto y vincular (usuario) |
+| ~~Aplicar la migración en el proyecto de pruebas~~ | ✅ Aplicada (2026-10-30, proyecto `gntapzufmayphesvpzxn`) |
 | Desplegar `send-device-code` y probar el correo real | Cuenta Resend + API key (usuario). Mientras tanto: `npm run codigo-dispositivo` |
-| Ejecutar `npm run test:integration` contra Supabase real | Credenciales en `.env.test.local` (usuario) |
-| Recorrido manual completo en el navegador | Todo lo anterior |
+| ~~Ejecutar `npm run test:integration` contra Supabase real~~ | ✅ 5/5 pasan (2026-10-30) |
+| ~~Configurar en el panel: Site URL y Redirect URLs~~ | ✅ Hecho por el usuario |
+| Plantillas de correo en español | Requieren SMTP propio (Resend). La app ya funciona con las plantillas por defecto |
+| ~~Recorrido manual completo en el navegador~~ | ✅ Registro, confirmación, verificación de dispositivo y datos del negocio funcionan y persisten (2026-10-30) |
 
 ## Limitaciones y riesgos conocidos
 

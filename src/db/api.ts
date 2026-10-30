@@ -6,6 +6,7 @@
  * etc.) solo requiere reimplementar este archivo con el mismo contrato.
  * Ver docs/portabilidad-postgresql.md.
  */
+import { clearAuthParamsFromAddressBar, parseAuthLink } from './authLink';
 import { appUrl, requireSupabase, sessionIdFromAccessToken } from './supabase';
 
 /** Resultado uniforme: `error` conserva el error original para traducirlo con shared/errors. */
@@ -94,15 +95,35 @@ export const authApi = {
     return { data: error ? null : true, error };
   },
 
-  /** Enlace de confirmación de registro (token de un solo uso). */
-  async confirmEmailLink(tokenHash: string): Promise<Result<true>> {
-    const { error } = await requireSupabase().auth.verifyOtp({ token_hash: tokenHash, type: 'email' });
-    return { data: error ? null : true, error };
-  },
+  /**
+   * Completa un enlace de correo (confirmación de registro o recuperación de contraseña).
+   * Acepta los formatos de las plantillas propias y de las plantillas por defecto de Supabase.
+   * Al terminar, quita los tokens de la barra de direcciones.
+   */
+  async completeAuthLink(url: URL, purpose: 'email' | 'recovery'): Promise<Result<true>> {
+    const link = parseAuthLink(url);
+    const auth = requireSupabase().auth;
+    let error: unknown = null;
 
-  /** Enlace de recuperación de contraseña (token de un solo uso). Abre una sesión temporal. */
-  async openRecoveryLink(tokenHash: string): Promise<Result<true>> {
-    const { error } = await requireSupabase().auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
+    switch (link.kind) {
+      case 'error':
+        error = { code: link.code, message: link.description ?? link.code };
+        break;
+      case 'missing':
+        error = { code: 'link_incomplete', message: 'El enlace está incompleto.' };
+        break;
+      case 'token_hash':
+        ({ error } = await auth.verifyOtp({ token_hash: link.tokenHash, type: purpose }));
+        break;
+      case 'session':
+        ({ error } = await auth.setSession({ access_token: link.accessToken, refresh_token: link.refreshToken }));
+        break;
+      case 'pkce':
+        ({ error } = await auth.exchangeCodeForSession(link.code));
+        break;
+    }
+
+    if (link.kind !== 'missing') clearAuthParamsFromAddressBar();
     return { data: error ? null : true, error };
   },
 

@@ -66,7 +66,11 @@ if (settings.body && typeof settings.body.mailer_autoconfirm === 'boolean') {
 }
 
 // Si las migraciones están aplicadas, la función existe pero el rol anónimo no puede ejecutarla.
-const rpc = await request('/rest/v1/rpc/begin_session', { method: 'POST', body: JSON.stringify({}) });
+// Hay que enviar los parámetros: PostgREST busca la función por su firma exacta.
+const rpc = await request('/rest/v1/rpc/begin_session', {
+  method: 'POST',
+  body: JSON.stringify({ p_device_token: 'diagnostico'.padEnd(40, '0'), p_device_label: null }),
+});
 if (rpc.body?.code === 'PGRST202' || rpc.status === 404) {
   fail('Las migraciones no están aplicadas', 'Ejecuta: npx supabase link --project-ref <ref>  y luego  npx supabase db push');
 } else if (rpc.status === 401 || rpc.status === 403 || rpc.body?.code === '42501') {

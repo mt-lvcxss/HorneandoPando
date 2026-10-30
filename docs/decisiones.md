@@ -106,6 +106,9 @@ dueño de la base de datos en el flujo normal. No se registran secretos, contras
 - Supabase Auth usa Resend vía SMTP; la Edge Function usa la API de Resend.
 - Las plantillas usan enlaces con `token_hash` (no el flujo PKCE) para que funcionen aunque el correo se
   abra en otro navegador o dispositivo.
+- **Actualización 2026-10-30:** Supabase solo permite editar plantillas con SMTP propio. La app acepta
+  también los enlaces de las plantillas por defecto (sesión en el fragmento y `code` PKCE), así que funciona
+  sin SMTP. Los tokens se borran de la barra de direcciones al procesarlos (`src/db/authLink.ts`).
 
 ## D-010 · Pruebas de base de datos con PGlite
 **Fecha:** 2026-10-30 · **Estado:** vigente
