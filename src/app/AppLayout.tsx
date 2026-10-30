@@ -12,6 +12,8 @@ import styles from './layout.module.css';
 const NAV_ITEMS = [
   { to: '/', label: 'Inicio', end: true },
   { to: '/ingredientes', label: 'Ingredientes', end: false },
+  { to: '/compras', label: 'Compras', end: false },
+  { to: '/inventario', label: 'Inventario', end: false },
   { to: '/configuracion/negocio', label: 'Datos del negocio', end: false },
   { to: '/configuracion/operacion', label: 'Configuración', end: false },
 ];

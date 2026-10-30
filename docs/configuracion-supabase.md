@@ -26,8 +26,8 @@ De cada proyecto, en *Project Settings → Data API / API Keys*:
 - **Clave secreta** (`sb_secret_...` o `service_role`): solo la del proyecto de **pruebas**, solo en
   `.env.test.local`. Nunca en el frontend.
 
-La forma más simple de crearlos es el asistente, **en tu propia terminal** (no con `!` en Claude Code,
-para que las claves no queden en la conversación):
+La forma más simple de crearlos es el asistente, **en tu propia terminal** (para que las claves no
+queden registradas en ningún historial compartido):
 
 ```
 npm run configurar
@@ -52,12 +52,12 @@ TEST_SUPABASE_SECRET_KEY=sb_secret_...
 
 ## 3. Vincular y aplicar migraciones
 
-En la terminal de Claude Code (el prefijo `!` ejecuta el comando en la sesión):
+En una terminal, desde la carpeta del proyecto:
 
 ```
-! npx supabase login
-! npx supabase link --project-ref <ref-test>
-! npx supabase db push
+npx supabase login
+npx supabase link --project-ref <ref-test>
+npx supabase db push
 ```
 
 `link` pedirá la contraseña de la base de datos. Para producción se repite con `<ref-prod>` solo

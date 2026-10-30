@@ -32,7 +32,7 @@ Moneda: peso chileno (CLP). Interfaz en español, adaptable a computador y telé
 | 6 · Administración | Panel administrativo, incidentes, inactividad de cuentas, alertas, respaldos y restauración. |
 | 7–8 · Validación y entrega | Recorridos completos, pruebas de concurrencia y seguridad, documentación final. |
 
-Especificación completa: [`prompt_completo.md`](prompt_completo.md).
+La especificación funcional completa es un documento interno y no forma parte del repositorio.
 
 ---
 
@@ -157,7 +157,6 @@ variables de entorno. Lista de pasos y pendientes comerciales:
 | [`docs/configuracion-supabase.md`](docs/configuracion-supabase.md) | Supabase, Resend y Edge Function paso a paso |
 | [`docs/portabilidad-postgresql.md`](docs/portabilidad-postgresql.md) | Uso con otros PostgreSQL |
 | [`docs/dominio-y-publicacion.md`](docs/dominio-y-publicacion.md) | Dominio, publicación y preparación comercial |
-| [`CLAUDE.md`](CLAUDE.md) | Reglas del proyecto para el desarrollo asistido |
 
 ## Problemas frecuentes
 

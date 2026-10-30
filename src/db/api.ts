@@ -452,3 +452,330 @@ function presentationParams(input: PresentationInput) {
     p_reference_price_date: input.referencePriceDate,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Compras e inventario (cantidades de inventario en unidad base: g, ml o unidad)
+// ---------------------------------------------------------------------------
+
+export type ChargeTreatment = 'separate_expense' | 'distributed';
+export type PartialRule = 'proportional' | 'first_use';
+
+export type PurchaseLineInput = {
+  presentation_id: string;
+  container_count: number;
+  /** En la unidad de la presentación; si se omite, el contenido nominal. */
+  content_per_container?: number;
+  list_total_clp?: number | null;
+  paid_total_clp: number;
+};
+
+export type PurchaseChargeInput = {
+  description: string;
+  amount_clp: number;
+  treatment: ChargeTreatment;
+  method?: ChargeDistribution | null;
+  partial_rule?: PartialRule | null;
+};
+
+export type PurchasePreview = {
+  lines: {
+    line_no: number;
+    ingredient_id: string;
+    ingredient_name: string;
+    brand_name: string;
+    container_count: number;
+    content_per_container: number;
+    content_unit: string;
+    incorporated_quantity: number;
+    paid_total_clp: number;
+    unit_cost: number;
+    charge_unit_cost: number;
+    charge_first_use_clp: number;
+  }[];
+  charges: {
+    charge_no: number;
+    description: string;
+    amount_clp: number;
+    treatment: ChargeTreatment;
+    method: ChargeDistribution | null;
+    partial_rule: PartialRule | null;
+    allocations: number[] | null;
+  }[];
+  paid_total_clp: number;
+  distributed_charges_clp: number;
+  separate_charges_clp: number;
+};
+
+export type Purchase = {
+  id: string;
+  purchased_on: string;
+  reference: string | null;
+  notes: string | null;
+  pending_verification: boolean;
+  verified_at: string | null;
+  created_at: string;
+};
+
+export type PurchaseLine = {
+  id: string;
+  purchase_id: string;
+  line_no: number;
+  ingredient_id: string;
+  brand_id: string;
+  presentation_id: string;
+  container_count: number;
+  content_per_container: number;
+  content_unit: string;
+  incorporated_quantity: number;
+  list_total_clp: number | null;
+  paid_total_clp: number;
+};
+
+export type PurchaseCharge = {
+  id: string;
+  charge_no: number;
+  description: string;
+  amount_clp: number;
+  treatment: ChargeTreatment;
+  method: ChargeDistribution | null;
+  partial_rule: PartialRule | null;
+};
+
+export type ChargeAllocation = { charge_id: string; purchase_line_id: string; amount_clp: number };
+
+export type PurchaseSummary = Purchase & {
+  purchase_lines: { paid_total_clp: number }[];
+  purchase_charges: { amount_clp: number }[];
+};
+
+export type CostStatus = 'known' | 'provisional' | 'unknown';
+
+export type Container = {
+  id: string;
+  ingredient_id: string;
+  brand_id: string;
+  presentation_id: string;
+  source: 'purchase' | 'manual_entry';
+  purchase_line_id: string | null;
+  received_on: string;
+  initial_quantity: number;
+  /** Cantidad realmente recibida (inicial ± correcciones de recepción); base del costo unitario. */
+  received_quantity: number;
+  balance: number;
+  unit_cost: number | null;
+  cost_status: CostStatus;
+  charge_unit_cost: number;
+  charge_first_use_clp: number;
+  opened_at: string | null;
+  created_at: string;
+};
+
+export type MovementKind =
+  | 'purchase'
+  | 'manual_entry'
+  | 'adjustment'
+  | 'waste'
+  | 'supplier_return'
+  | 'receipt_correction'
+  | 'reversal'
+  | 'production_consumption';
+
+export type Movement = {
+  id: string;
+  container_id: string;
+  ingredient_id: string;
+  kind: MovementKind;
+  quantity: number;
+  balance_before: number;
+  balance_after: number;
+  reason: string | null;
+  reference: string | null;
+  operation_type: string;
+  reverses_movement_id: string | null;
+  created_at: string;
+};
+
+export type IngredientStock = {
+  ingredient_id: string;
+  available: number;
+  containers_with_stock: number;
+  open_containers: number;
+};
+
+export type StockAlert = { id: string; ingredient_id: string; opened_at: string; resolved_at: string | null };
+
+export type ManualEntryInput = {
+  presentationId: string;
+  containerCount: number;
+  /** En la unidad de la presentación. */
+  quantityPerContainer: number;
+  receivedOn: string;
+  totalCostClp: number | null;
+  costIsProvisional: boolean;
+  opened: boolean;
+  reason: string | null;
+};
+
+export type ContainerMovementKind = 'adjustment' | 'waste' | 'supplier_return' | 'receipt_correction';
+
+export type CountLineInput = { container_id: string; expected_balance: number; counted_quantity: number };
+
+export const purchasesApi = {
+  async list(): Promise<Result<PurchaseSummary[]>> {
+    const { data, error } = await requireSupabase()
+      .from('purchases')
+      .select('*, purchase_lines(paid_total_clp), purchase_charges(amount_clp)')
+      .order('purchased_on', { ascending: false })
+      .order('created_at', { ascending: false });
+    return { data: data as PurchaseSummary[] | null, error };
+  },
+
+  async get(
+    id: string,
+  ): Promise<Result<{ purchase: Purchase; lines: PurchaseLine[]; charges: PurchaseCharge[]; allocations: ChargeAllocation[] }>> {
+    const sb = requireSupabase();
+    const [p, l, c] = await Promise.all([
+      sb.from('purchases').select('*').eq('id', id).maybeSingle(),
+      sb.from('purchase_lines').select('*').eq('purchase_id', id).order('line_no'),
+      sb.from('purchase_charges').select('*').eq('purchase_id', id).order('charge_no'),
+    ]);
+    const error = p.error ?? l.error ?? c.error;
+    if (error || !p.data) return { data: null, error };
+    const chargeIds = (c.data ?? []).map((x) => (x as PurchaseCharge).id);
+    const a = chargeIds.length
+      ? await sb.from('purchase_charge_allocations').select('*').in('charge_id', chargeIds)
+      : { data: [], error: null };
+    if (a.error) return { data: null, error: a.error };
+    return {
+      data: {
+        purchase: p.data as Purchase,
+        lines: (l.data ?? []) as PurchaseLine[],
+        charges: (c.data ?? []) as PurchaseCharge[],
+        allocations: (a.data ?? []) as ChargeAllocation[],
+      },
+      error: null,
+    };
+  },
+
+  async preview(lines: PurchaseLineInput[], charges: PurchaseChargeInput[]): Promise<Result<PurchasePreview>> {
+    const { data, error } = await requireSupabase().rpc('preview_purchase', { p_lines: lines, p_charges: charges });
+    return { data: data as PurchasePreview | null, error };
+  },
+
+  async confirm(
+    idempotencyKey: string,
+    input: {
+      purchasedOn: string;
+      lines: PurchaseLineInput[];
+      charges: PurchaseChargeInput[];
+      reference: string | null;
+      pendingVerification: boolean;
+      notes: string | null;
+    },
+  ): Promise<Result<Purchase>> {
+    const { data, error } = await requireSupabase().rpc('confirm_purchase', {
+      p_idempotency_key: idempotencyKey,
+      p_purchased_on: input.purchasedOn,
+      p_lines: input.lines,
+      p_charges: input.charges,
+      p_reference: input.reference,
+      p_pending_verification: input.pendingVerification,
+      p_notes: input.notes,
+    });
+    return { data: data as Purchase | null, error };
+  },
+
+  async setVerified(id: string): Promise<Result<Purchase>> {
+    const { data, error } = await requireSupabase().rpc('set_purchase_verified', { p_purchase_id: id });
+    return { data: data as Purchase | null, error };
+  },
+};
+
+export const inventoryApi = {
+  async listStock(): Promise<Result<IngredientStock[]>> {
+    const { data, error } = await requireSupabase().from('ingredient_stock').select('*');
+    return { data: data as IngredientStock[] | null, error };
+  },
+
+  async listOpenAlerts(): Promise<Result<StockAlert[]>> {
+    const { data, error } = await requireSupabase().from('stock_alerts').select('*').is('resolved_at', null).order('opened_at');
+    return { data: data as StockAlert[] | null, error };
+  },
+
+  async listContainers(ingredientId: string): Promise<Result<Container[]>> {
+    const { data, error } = await requireSupabase()
+      .from('containers')
+      .select('*')
+      .eq('ingredient_id', ingredientId)
+      .order('received_on')
+      .order('created_at');
+    return { data: data as Container[] | null, error };
+  },
+
+  async listMovements(ingredientId: string, limit = 200): Promise<Result<Movement[]>> {
+    const { data, error } = await requireSupabase()
+      .from('inventory_movements')
+      .select('*')
+      .eq('ingredient_id', ingredientId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    return { data: data as Movement[] | null, error };
+  },
+
+  async registerManualEntry(idempotencyKey: string, input: ManualEntryInput): Promise<Result<true>> {
+    const { error } = await requireSupabase().rpc('register_manual_entry', {
+      p_idempotency_key: idempotencyKey,
+      p_presentation_id: input.presentationId,
+      p_container_count: input.containerCount,
+      p_quantity_per_container: input.quantityPerContainer,
+      p_received_on: input.receivedOn,
+      p_total_cost_clp: input.totalCostClp,
+      p_cost_is_provisional: input.costIsProvisional,
+      p_opened: input.opened,
+      p_reason: input.reason,
+    });
+    return { data: error ? null : true, error };
+  },
+
+  /** quantity: saldo correcto (ajuste), cantidad que sale (merma/devolución) o diferencia con signo (corrección). */
+  async registerMovement(
+    idempotencyKey: string,
+    input: {
+      containerId: string;
+      kind: ContainerMovementKind;
+      quantity: number;
+      reason: string | null;
+      reference: string | null;
+      expectedBalance: number | null;
+    },
+  ): Promise<Result<Movement>> {
+    const { data, error } = await requireSupabase().rpc('register_container_movement', {
+      p_idempotency_key: idempotencyKey,
+      p_container_id: input.containerId,
+      p_kind: input.kind,
+      p_quantity: input.quantity,
+      p_reason: input.reason,
+      p_reference: input.reference,
+      p_expected_balance: input.expectedBalance,
+    });
+    return { data: data as Movement | null, error };
+  },
+
+  async reverseMovement(idempotencyKey: string, movementId: string, reason: string | null): Promise<Result<Movement>> {
+    const { data, error } = await requireSupabase().rpc('reverse_movement', {
+      p_idempotency_key: idempotencyKey,
+      p_movement_id: movementId,
+      p_reason: reason,
+    });
+    return { data: data as Movement | null, error };
+  },
+
+  async confirmCount(idempotencyKey: string, lines: CountLineInput[], notes: string | null): Promise<Result<{ adjusted: number }>> {
+    const { data, error } = await requireSupabase().rpc('confirm_inventory_count', {
+      p_idempotency_key: idempotencyKey,
+      p_lines: lines,
+      p_notes: notes,
+    });
+    return { data: data as { adjusted: number } | null, error };
+  },
+};

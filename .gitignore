@@ -12,8 +12,16 @@ coverage/
 supabase/.temp/
 supabase/.branches/
 
-# Configuración personal de Claude Code
-.claude/settings.local.json
+# Asistentes de IA, prompts y especificaciones internas (no forman parte de la entrega pública)
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+**/CLAUDE.md
+.mcp.json
+prompt_completo.md
+prompt*.md
+prompts/
+*.prompt.md
 
 # Sistema / editores
 .DS_Store

@@ -36,12 +36,12 @@ Actualizado: 2026-10-30.
 
 ## Etapa 3 · Núcleo operacional — en curso
 
-Plan confirmado: `docs/plan-etapa-3.md` (decisiones D-017 a D-020).
+Plan confirmado: `docs/plan-etapa-3.md` (decisiones D-017 a D-023).
 
 | Subetapa | Estado |
 |---|---|
-| 3.1 Catálogo y configuración | Implementada con los ajustes de D-019 y D-020 (20 pruebas de base de datos del catálogo). **Pendiente:** recorrido en el navegador |
-| 3.2 Compras e inventario por envase | Pendiente |
+| 3.1 Catálogo y configuración | ✅ Cerrada (commit 57020e4) |
+| 3.2 Compras e inventario por envase | Implementada: 17 pruebas de base de datos y 2 de concurrencia contra Supabase real. Migración aplicada en `horneando-test`. **Pendiente:** recorrido en el navegador |
 | 3.3 Recetas y versiones | Pendiente |
 | 3.4 Simulaciones | Pendiente (confirmar detalle del precio sugerido) |
 | 3.5 Producción real y costos | Pendiente |
@@ -59,6 +59,19 @@ Plan confirmado: `docs/plan-etapa-3.md` (decisiones D-017 a D-020).
 
 ================================================================================
 
+### 3.2 · Qué incluye
+- Compras con varios productos, contenido real por envase, precio de lista y pagado, referencia y marca
+  "pendiente de verificación". Vista previa antes de confirmar. Cada envase físico queda registrado con su costo.
+- Cargos adicionales: gasto separado o distribuido (por valor o por cantidad), sin perder ni duplicar pesos.
+- Corrección de recepción: el costo del envase se recalcula sobre lo que realmente llegó (D-022).
+- Entrada manual (stock inicial, regalos) con costo conocido, provisional o desconocido; envases abiertos.
+- Merma, devolución a proveedor, ajuste de saldo, corrección de recepción y reversión, siempre como movimientos nuevos.
+- Conteo físico parcial por envase con confirmación; rechaza conteos desactualizados.
+- Disponible visible en ingredientes, inventario y detalle; aviso solo cuando un ingrediente se agota (también en Inicio).
+- Pantallas: `/compras`, `/compras/nueva`, `/compras/:id`, `/inventario`, `/inventario/:id`.
+
+================================================================================
+
 ## Limitaciones y riesgos conocidos
 
 | # | Descripción | Impacto | Riesgo | Plan |
@@ -66,13 +79,16 @@ Plan confirmado: `docs/plan-etapa-3.md` (decisiones D-017 a D-020).
 | L-1 | Sin dominio verificado, Resend solo envía al correo del dueño de la cuenta | Otros usuarios no reciben correos | Bajo mientras se use solo en localhost | Dominio pospuesto (D-014); pasos en `dominio-y-publicacion.md` |
 | L-2 | El plan gratuito de Supabase pausa proyectos tras ~7 días sin actividad | La app deja de responder hasta reactivarla | Medio | Monitorear; evaluar plan pago tras el piloto |
 | L-3 | El plan gratuito no incluye respaldos descargables | Pérdida de datos ante incidente | Alto con datos reales | Respaldo semanal propio vía GitHub Actions **antes de tener usuarios reales** |
-| L-4 | Concurrencia real no se puede probar con PGlite | Errores de concurrencia no detectados localmente | Medio | Pruebas de concurrencia contra `horneando-test` (Etapa 3) |
-| L-5 | Paquete JS de 596 kB | Carga inicial más lenta en móviles | Bajo | División por módulos al crecer la app |
+| L-4 | Concurrencia real no se puede probar con PGlite | Errores de concurrencia no detectados localmente | Bajo | Inventario cubierto con pruebas contra `horneando-test` (D-021); producción (3.5) agregará las suyas |
+| L-5 | Paquete JS de 636 kB | Carga inicial más lenta en móviles | Bajo | División por módulos al crecer la app |
 | L-6 | Borrar datos del navegador obliga a verificar el dispositivo otra vez | Molestia menor | Bajo | Documentado en la ayuda |
 | L-7 | PWA (instalación y borradores sin conexión) aún no implementada | No instalable todavía | Bajo | Etapa 3–5 |
 | L-8 | Usuarios de prueba de integración no se pueden borrar (FK `on delete restrict`) | Basura en el proyecto de pruebas | Bajo | Se bloquean al terminar; limpieza manual periódica |
 | L-9 | Compatibilidad con PostgreSQL 15/16/17 verificada solo en CI (no hay PostgreSQL en el equipo de desarrollo) | Una incompatibilidad se detectaría al hacer push | Bajo | Revisar el resultado de la CI en el primer push |
 | L-10 | Autenticación (registro, correos, contraseñas) depende de Supabase Auth | Cambiar de proveedor requiere reimplementar `authApi` | Medio | Contrato documentado en `portabilidad-postgresql.md` |
 | L-11 | Las plantillas de correo de Supabase Auth tienen el nombre "Horneando Pando" escrito | Cambiar de marca requiere editarlas | Bajo | Documentado en `dominio-y-publicacion.md` |
+| L-12 | ~~Una corrección de recepción no recalculaba el costo unitario~~ | — | — | ✅ Resuelto: el costo se reparte sobre lo recibido (D-022) |
+| L-13 | Los cargos registrados como gasto separado aún no aparecen en ningún informe | No se ven fuera del detalle de la compra | Bajo | Se incluyen con los gastos generales (3.6) |
+| L-14 | Los archivos internos excluidos en D-023 siguen en el historial de git (y en `origin`) aunque ya no se versionan | Serían visibles si el repositorio se publica tal cual | Medio antes de la entrega | Reescribir el historial antes de hacerlo público, con confirmación del usuario (D-023) |
 
 ================================================================================

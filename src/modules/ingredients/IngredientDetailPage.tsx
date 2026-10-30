@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { catalogApi, type Brand, type Equivalence, type Ingredient, type Presentation } from '../../db/api';
+import { catalogApi, inventoryApi, type Brand, type Equivalence, type Ingredient, type Presentation } from '../../db/api';
 import { friendlyError } from '../../shared/errors';
 import { Alert, Badge, Button, Card, Dialog, Loading, PageHeader, Stack, Table } from '../../shared/ui';
 import { useOnlineStatus } from '../../shared/useOnlineStatus';
 import { BrandsSection } from './BrandsSection';
-import { DIMENSION_LABEL, useUnits } from './catalog';
+import { DIMENSION_LABEL, formatBaseAmount, useUnits } from './catalog';
 import { EquivalencesCard } from './EquivalencesCard';
 import { IngredientForm } from './IngredientForm';
 
@@ -14,6 +14,7 @@ type Data = {
   brands: Brand[];
   presentations: Presentation[];
   equivalences: Equivalence[];
+  available: number;
 };
 
 export function IngredientDetailPage() {
@@ -29,16 +30,23 @@ export function IngredientDetailPage() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const [ing, brands, pres, eq] = await Promise.all([
+    const [ing, brands, pres, eq, stock] = await Promise.all([
       catalogApi.getIngredient(id),
       catalogApi.listBrands(id),
       catalogApi.listPresentations(id),
       catalogApi.listEquivalences(id),
+      inventoryApi.listStock(),
     ]);
-    const error = ing.error ?? brands.error ?? pres.error ?? eq.error;
+    const error = ing.error ?? brands.error ?? pres.error ?? eq.error ?? stock.error;
     if (error) return setLoadError(friendlyError(error));
     if (!ing.data) return setNotFound(true);
-    setData({ ingredient: ing.data, brands: brands.data ?? [], presentations: pres.data ?? [], equivalences: eq.data ?? [] });
+    setData({
+      ingredient: ing.data,
+      brands: brands.data ?? [],
+      presentations: pres.data ?? [],
+      equivalences: eq.data ?? [],
+      available: Number((stock.data ?? []).find((s) => s.ingredient_id === id)?.available ?? 0),
+    });
   }, [id]);
 
   useEffect(() => {
@@ -122,6 +130,12 @@ export function IngredientDetailPage() {
           ) : (
             <Table>
               <tbody>
+                <tr>
+                  <th>Disponible</th>
+                  <td>
+                    <Link to={`/inventario/${ingredient.id}`}>{formatBaseAmount(data.available, ingredient.dimension, units)}</Link>
+                  </td>
+                </tr>
                 <tr>
                   <th>Se mide en</th>
                   <td>{DIMENSION_LABEL[ingredient.dimension]}</td>

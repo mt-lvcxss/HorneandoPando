@@ -282,3 +282,65 @@ Se elimina la columna de categoría. Migración: `20261031110000_ingredientes_ma
 vacío (la migración se niega a correr si hay datos de catálogo).
 
 ================================================================================
+
+## D-021 · Inventario por envase y concurrencia
+**Fecha:** 2026-10-30 · **Estado:** vigente
+
+- **Un registro por envase físico** (`containers`): compra u origen, fecha, cantidad inicial, saldo, costo por unidad
+  base y estado de costo (`known` / `provisional` / `unknown`; desconocido = NULL, nunca 0).
+- **Un único camino para mover stock:** `private.apply_movement`. Bloquea el ingrediente y luego el envase
+  (`for update`), valida que el saldo no quede negativo, actualiza el saldo e inserta el movimiento con el saldo
+  anterior y posterior. Un trigger rechaza cualquier otro cambio de saldo, incluso del dueño de la base de datos.
+- **Orden de bloqueo:** ingredientes por id, después envases. Serializa las operaciones sobre un mismo ingrediente
+  (necesario para que el aviso de agotado sea exacto) sin bloquear ingredientes distintos.
+- **Verificado con concurrencia real** en `horneando-test`: 10 mermas simultáneas desde dos sesiones sobre 1.000 g
+  aplican exactamente las 6 que caben; el mismo envío desde dos sesiones se registra una vez (resuelve L-4 para inventario).
+- **Saldos desactualizados:** ajustes y conteos envían el saldo que el usuario estaba viendo; si cambió, la operación
+  falla con `STALE_BALANCE` en vez de sobrescribir.
+- **Compras:** el contenido real por envase puede diferir del nominal. El costo del producto = total pagado / cantidad
+  incorporada. Una presentación con envases ya no puede cambiar su contenido.
+- **Cargos adicionales:** gasto separado o distribuido (por valor o por cantidad física, esta última solo si todas las
+  líneas son de la misma dimensión). El reparto usa el método del mayor resto: la suma de las asignaciones es
+  exactamente el monto del cargo. En el envase se guardan aparte del costo del producto: por unidad consumida (regla
+  proporcional) o un monto íntegro para el primer uso. Se aplican al consumir (subetapa 3.5).
+- **Correcciones:** merma, devolución a proveedor, ajuste, corrección de recepción y reversión son movimientos nuevos.
+  Solo se revierten ajustes, mermas, devoluciones y correcciones, una sola vez. Compras y entradas no se revierten.
+- **Avisos de agotado:** uno abierto por ingrediente (índice único parcial); se cierra al haber stock otra vez y se crea
+  uno nuevo si vuelve a agotarse. No se generan para ingredientes que nunca tuvieron stock.
+- **Cantidades en la API:** movimientos y conteos usan la unidad base (g, ml, unidad); compras y entradas manuales, la
+  unidad de la presentación. La pantalla convierte con unidades de la misma dimensión.
+
+Migración: `20261031120000_compras_inventario.sql`.
+
+================================================================================
+
+## D-022 · El costo de un envase se reparte sobre lo que realmente llegó
+**Fecha:** 2026-10-30 · **Estado:** vigente · Resuelve L-12
+
+Decisión del usuario: si una compra llega con más o menos de lo registrado, la corrección de recepción recalcula
+el costo por unidad del envase sobre la cantidad realmente recibida.
+- Cada envase guarda `received_quantity` (cantidad inicial ± correcciones de recepción netas).
+- Costo unitario = (pagado de la línea / n° de envases) / cantidad recibida. Los cargos proporcionales se recalculan
+  igual; el cargo "completo en el primer uso" es un monto fijo y no cambia.
+- Se recalcula desde los datos de origen de la compra, no multiplicando el valor anterior, para no acumular redondeos.
+- Revertir la corrección restituye el costo. Una corrección que dejaría el envase sin nada recibido se rechaza
+  (`NOTHING_RECEIVED`): si no llegó, corresponde una devolución al proveedor.
+- El recálculo queda en la auditoría con los valores anteriores y nuevos. Un trigger impide cambiar el costo fuera
+  de esta operación (`COST_DIRECT_UPDATE`). Los consumos ya registrados (3.5) conservan su valoración original.
+
+Migración: `20261031130000_costo_segun_recepcion.sql`.
+
+================================================================================
+
+## D-023 · El repositorio se entrega público sin archivos de asistentes ni especificaciones internas
+**Fecha:** 2026-10-30 · **Estado:** vigente
+
+El repositorio será público en la entrega. Por decisión del usuario, quedan fuera del control de versiones (`.gitignore`)
+la configuración de herramientas de desarrollo asistido, los prompts y la especificación funcional interna.
+Se conservan en el equipo de desarrollo.
+- Los que ya estaban versionados se quitaron del índice con `git rm --cached` (no se borraron del disco).
+- La documentación pública ya no los enlaza; se refiere a la "especificación funcional" como documento interno.
+- **Pendiente:** esos archivos siguen en el historial de commits anteriores. Para que no sean visibles en un
+  repositorio público hay que reescribir el historial antes de publicarlo (ver L-14).
+
+================================================================================

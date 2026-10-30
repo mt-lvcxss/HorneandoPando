@@ -1,10 +1,21 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { useAuth } from '../auth/AuthProvider';
+import { catalogApi, inventoryApi, type Ingredient } from '../db/api';
 import { Alert, Card } from '../shared/ui';
 
 export function DashboardPage() {
   const { account } = useAuth();
   const needsSetup = !account?.business_name;
+  const [outOfStock, setOutOfStock] = useState<Ingredient[]>([]);
+
+  useEffect(() => {
+    void Promise.all([inventoryApi.listOpenAlerts(), catalogApi.listIngredients()]).then(([alerts, ingredients]) => {
+      if (alerts.error || ingredients.error) return;
+      const ids = new Set((alerts.data ?? []).map((a) => a.ingredient_id));
+      setOutOfStock((ingredients.data ?? []).filter((i) => ids.has(i.id) && !i.archived_at));
+    });
+  }, []);
 
   return (
     <>
@@ -19,6 +30,20 @@ export function DashboardPage() {
         </Alert>
       )}
 
+      {outOfStock.length > 0 && (
+        <Alert tone="warning" title="Ingredientes agotados">
+          <p>
+            {outOfStock.map((i, n) => (
+              <span key={i.id}>
+                {n > 0 && ', '}
+                <Link to={`/inventario/${i.id}`}>{i.name}</Link>
+              </span>
+            ))}
+            . Registra una <Link to="/compras/nueva">compra</Link> para seguir usándolos.
+          </p>
+        </Alert>
+      )}
+
       <Card>
         <h2>Estado de la plataforma</h2>
         <p>
@@ -26,9 +51,9 @@ export function DashboardPage() {
           código enviado a tu correo.
         </p>
         <p>
-          Ya puedes registrar tus <Link to="/ingredientes">ingredientes</Link> con sus presentaciones. Compras, inventario,
-          recetas y producción se irán habilitando a medida que avance el desarrollo. Este panel mostrará pedidos, alertas de
-          inventario y finanzas cuando esos módulos registren datos reales.
+          Ya puedes registrar tus <Link to="/ingredientes">ingredientes</Link>, sus <Link to="/compras">compras</Link> y llevar
+          el <Link to="/inventario">inventario</Link> por envase. Recetas y producción se irán habilitando a medida que avance el
+          desarrollo.
         </p>
       </Card>
     </>

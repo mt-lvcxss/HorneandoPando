@@ -2,7 +2,7 @@
 
 Estado: **confirmado** (2026-10-30). Respuestas a las preguntas abiertas: D-017 en `decisiones.md`. Ajustes posteriores del usuario: D-019
 (sin stock mínimo ni costo de reposición; aviso solo al agotarse un ingrediente) y D-020 (Ingrediente → Marca → Presentación).
-Referencias: secciones 6–11 de `prompt_completo.md`; decisiones D-002, D-003, D-006, D-008.
+Referencias: secciones 6–11 de la especificación funcional; decisiones D-002, D-003, D-006, D-008.
 
 ================================================================================
 

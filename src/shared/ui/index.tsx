@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react';
+import { Link } from 'react-router';
 import styles from './ui.module.css';
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -14,6 +15,15 @@ export function Button({ variant = 'primary', fullWidth, busy, disabled, classNa
     <button className={classes} disabled={disabled || busy} aria-busy={busy || undefined} {...rest}>
       {busy ? 'Procesando…' : children}
     </button>
+  );
+}
+
+/** Enlace de navegación con aspecto de botón. */
+export function ButtonLink({ to, variant = 'primary', children }: { to: string; variant?: 'primary' | 'secondary'; children: ReactNode }) {
+  return (
+    <Link className={`${styles.button} ${styles[variant]}`} to={to}>
+      {children}
+    </Link>
   );
 }
 

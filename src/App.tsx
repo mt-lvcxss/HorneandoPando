@@ -12,6 +12,11 @@ import { ResetPasswordPage } from './auth/pages/ResetPasswordPage';
 import { VerifyDevicePage } from './auth/pages/VerifyDevicePage';
 import { configResult } from './db/supabase';
 import { IngredientDetailPage } from './modules/ingredients/IngredientDetailPage';
+import { IngredientInventoryPage } from './modules/inventory/IngredientInventoryPage';
+import { InventoryPage } from './modules/inventory/InventoryPage';
+import { NewPurchasePage } from './modules/purchases/NewPurchasePage';
+import { PurchaseDetailPage } from './modules/purchases/PurchaseDetailPage';
+import { PurchasesPage } from './modules/purchases/PurchasesPage';
 import { IngredientsPage } from './modules/ingredients/IngredientsPage';
 import { BusinessProfilePage } from './modules/settings/BusinessProfilePage';
 import { OperationSettingsPage } from './modules/settings/OperationSettingsPage';
@@ -35,6 +40,11 @@ export function App() {
               <Route index element={<DashboardPage />} />
               <Route path="/ingredientes" element={<IngredientsPage />} />
               <Route path="/ingredientes/:id" element={<IngredientDetailPage />} />
+              <Route path="/compras" element={<PurchasesPage />} />
+              <Route path="/compras/nueva" element={<NewPurchasePage />} />
+              <Route path="/compras/:id" element={<PurchaseDetailPage />} />
+              <Route path="/inventario" element={<InventoryPage />} />
+              <Route path="/inventario/:id" element={<IngredientInventoryPage />} />
               <Route path="/configuracion/negocio" element={<BusinessProfilePage />} />
               <Route path="/configuracion/operacion" element={<OperationSettingsPage />} />
             </Route>

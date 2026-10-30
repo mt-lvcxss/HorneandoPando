@@ -58,3 +58,8 @@ export function formatDateTime(iso: string | null | undefined, timeZone: string)
   if (!iso) return '—';
   return new Intl.DateTimeFormat('es-CL', { dateStyle: 'short', timeStyle: 'short', timeZone }).format(new Date(iso));
 }
+
+/** Fecha de hoy (YYYY-MM-DD) en la zona horaria del negocio. */
+export function todayIn(timeZone: string): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+}

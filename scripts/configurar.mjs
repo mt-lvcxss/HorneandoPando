@@ -3,8 +3,8 @@
  * Asistente de configuración: crea .env.local (frontend) y, opcionalmente, .env.test.local
  * (pruebas de integración).
  *
- * Ejecútalo en tu propia terminal (PowerShell, terminal de VS Code), NO con el prefijo "!" de
- * Claude Code: así las claves no quedan registradas en la conversación.
+ * Ejecútalo en tu propia terminal (PowerShell, terminal de VS Code): así las claves no quedan
+ * registradas en ningún historial compartido.
  *
  *   npm run configurar
  */
