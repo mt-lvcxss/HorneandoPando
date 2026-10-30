@@ -406,3 +406,16 @@ Migración: `20261031150000_precio_sugerido.sql`.
 Migración: `20261031160000_simulaciones.sql`.
 
 ================================================================================
+
+## D-027 · Producción real: anulación y precio para revalorar
+**Fecha:** 2026-10-30 · **Estado:** vigente
+
+Plan de la subetapa 3.5 confirmado por el usuario (detalle en `docs/plan-etapa-3.md`), con estas decisiones:
+- **Anular una producción confirmada (P-6):** se permite, con motivo obligatorio. Lo consumido vuelve a los mismos
+  envases mediante movimientos de reversión vinculados; la producción queda en estado "anulada" y se conserva todo
+  su historial, incluidas sus valoraciones.
+- **Precio histórico verificable para revalorar (P-7):** el costo de la compra más reciente del mismo ingrediente
+  con fecha igual o anterior a la fecha de la producción. Si no existe, solo un costo provisional ingresado por el
+  usuario, rotulado como estimación. La valoración original nunca cambia.
+
+================================================================================

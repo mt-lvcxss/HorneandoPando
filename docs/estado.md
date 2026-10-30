@@ -36,15 +36,15 @@ Actualizado: 2026-10-30.
 
 ## Etapa 3 · Núcleo operacional — en curso
 
-Plan confirmado: `docs/plan-etapa-3.md` (decisiones D-017 a D-026).
+Plan confirmado: `docs/plan-etapa-3.md` (decisiones D-017 a D-027).
 
 | Subetapa | Estado |
 |---|---|
 | 3.1 Catálogo y configuración | ✅ Cerrada (commit 57020e4) |
 | 3.2 Compras e inventario por envase | ✅ Cerrada (commit b567382) |
 | 3.3 Recetas y versiones | ✅ Cerrada (commit e9e3fac) |
-| 3.4 Simulaciones | ✅ Cerrada (recorrido en el navegador aprobado por el usuario) |
-| 3.5 Producción real y costos | Pendiente |
+| 3.4 Simulaciones | ✅ Cerrada (commit 7686ca7) |
+| 3.5 Producción real y costos | **Siguiente paso.** Plan confirmado (P-6 y P-7 aceptadas, D-027); implementación sin empezar |
 | 3.6 Productos terminados y gastos generales | Pendiente |
 | 3.7 Cierre de la etapa | Pendiente |
 

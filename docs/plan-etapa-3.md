@@ -78,19 +78,59 @@ manual. Me detengo al final de cada una para que la revises en el navegador ante
 - Pantallas: nueva simulación, detalle, historial, “producir desde esta simulación”.
 
 ### 3.5 · Producción real y costos
-- Asistente: receta/versión (o simulación) → cantidades → propuesta de envases editable → costo recalculado →
-  verificación de stock → confirmación.
-- `confirm_production`: dentro de una transacción, con idempotencia: bloquea los envases, valida que la asignación
-  cubra la necesidad y que ningún envase quede negativo ni mezcle unidades sin equivalencia, crea la producción,
-  los consumos por envase (con el costo unitario de ese momento) y los movimientos `production_consumption`.
-  Stock insuficiente → bloqueo con opciones “ir a inventario” / “elegir otra receta”.
-- Desde una simulación: revalida, recalcula la propuesta y guarda las diferencias con la simulación original.
-- Mano de obra por producción o por unidad (elegido por el usuario); embalajes y otros costos como líneas.
-  Lo no registrado se marca incompleto con advertencia.
-- **Valoración histórica** inmutable + **revaloraciones** (`production_valuations`): original, corregida, fecha,
-  motivo. Al registrar precios nuevos se listan producciones potencialmente afectadas; el usuario elige cuáles
-  revalorar. Solo con precios históricos verificables o un costo provisional explícito, rotulado como tal.
-- Anulación de una producción confirmada = movimientos de reversión (no se borra).
+
+Detalle planificado y confirmado el 2026-10-30 (sección 10.2 de la especificación, pasos 1 a 12).
+
+**Modelo de datos (migración nueva; todo inmutable salvo las marcas indicadas)**
+- `productions`: receta, versión, simulación de origen (opcional), fecha de producción (hoy o anterior),
+  rendimiento planificado, mano de obra efectiva, otros costos, notas y estado (`confirmed` / `voided`).
+- `production_lines`: por ingrediente, la cantidad calculada, la confirmada, si se ajustó a mano y la
+  equivalencia usada.
+- `production_consumptions`: por envase, la cantidad, el costo unitario y de cargos **de ese momento**, el cargo
+  de primer uso imputado, el estado de costo y el movimiento de inventario.
+- `production_valuations`: la valoración original (histórica) y las corregidas (revaloraciones), cada una con
+  total, detalle por ingrediente, método, fecha y motivo. La original nunca cambia.
+- `production_yields`: rendimiento real conocido, con historial (al confirmar o después).
+- Envases: nueva marca `first_use_charged_at` para que el cargo "completo en el primer uso" se impute una sola vez.
+
+**Flujo en pantalla (`/producciones/nueva`)**
+1. Receta y versión (vigente por defecto), o "Producir desde esta simulación".
+2. Rendimiento y cantidades, con ajustes manuales por ingrediente.
+3. Propuesta de envases (la misma de 3.4), **editable**: cambiar la cantidad por envase o elegir otros envases del
+   mismo ingrediente. El costo se recalcula en cada cambio.
+4. Validación en pantalla y en el servidor: lo asignado debe ser **exactamente** lo confirmado por ingrediente,
+   ningún envase por sobre su saldo, ninguna unidad sin conversión.
+5. Stock insuficiente → no se puede confirmar; opciones: ir al inventario o elegir otra receta.
+6. Mano de obra efectiva (por producción o por unidad) y otros costos; lo no registrado queda incompleto.
+7. Confirmación en un diálogo de resumen.
+8. Desde una simulación: se recalcula con el inventario actual y se muestran las diferencias con la simulación.
+
+**`confirm_production` (una transacción, con idempotencia)**
+- Bloquea los ingredientes en orden de id y luego los envases, revalida saldos y asignación, y crea la producción,
+  sus líneas y consumos, un movimiento `production_consumption` por envase (vía `apply_movement`) y la valoración
+  original. Si otro dispositivo consumió el stock entretanto, falla de forma controlada y no queda nada registrado.
+
+**Después de confirmar (`/producciones/:id`)**
+- Cantidades, envases usados y costo histórico (principal), última valoración corregida e historial.
+- Costo unitario real solo si hay rendimiento real registrado; si no, el teórico rotulado como tal.
+- Registrar el rendimiento real.
+- Revalorar (9.7): al registrar compras o costos nuevos de un ingrediente, se listan las producciones con costo
+  incompleto que lo usan; el usuario elige cuáles revalorar.
+- Anular (pregunta P-6).
+
+**Pruebas**
+- Base de datos: atomicidad (si falla una línea no queda nada), validación de la asignación editada, saldos nunca
+  negativos, reconciliación, idempotencia, cargo de primer uso una sola vez, valoración original inmutable,
+  revaloración y aislamiento entre cuentas.
+- Integración contra Supabase real: dos producciones simultáneas sobre el mismo envase (una falla de forma
+  controlada) y doble envío de la misma confirmación.
+
+**Preguntas resueltas (aceptadas por el usuario el 2026-10-30, D-027)**
+- **P-6 · Anular una producción:** aceptado: se permite con motivo obligatorio. Devuelve lo consumido a los mismos
+  envases con movimientos de reversión; la producción queda "anulada" y su historial se conserva.
+- **P-7 · Precio histórico verificable para revalorar:** aceptado: el costo de la compra más reciente del mismo
+  ingrediente con fecha igual o anterior a la producción. Si no existe, solo un costo provisional ingresado por el
+  usuario, rotulado como estimación.
 
 ### 3.6 · Productos terminados y gastos generales
 - Si el seguimiento está **habilitado**: lote por producción con rendimiento real, unidades disponibles, mermas y
